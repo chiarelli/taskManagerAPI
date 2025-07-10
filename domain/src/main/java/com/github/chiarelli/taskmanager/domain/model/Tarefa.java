@@ -1,0 +1,105 @@
+package com.github.chiarelli.taskmanager.domain.model;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+
+import com.github.chiarelli.taskmanager.domain.entity.ComentarioId;
+import com.github.chiarelli.taskmanager.domain.entity.HistoricoId;
+import com.github.chiarelli.taskmanager.domain.entity.TarefaId;
+import com.github.chiarelli.taskmanager.domain.event.ComentarioAdicionadoEvent;
+import com.github.chiarelli.taskmanager.domain.event.DescricaoTarefaAlteradaEvent;
+import com.github.chiarelli.taskmanager.domain.event.StatusTarefaAlteradoEvent;
+import com.github.chiarelli.taskmanager.domain.event.TarefaExcluidaEvent;
+import com.github.chiarelli.taskmanager.domain.exception.DomainException;
+import com.github.chiarelli.taskmanager.domain.vo.DataVencimentoVO;
+import com.github.chiarelli.taskmanager.domain.vo.ePrioridadeVO;
+import com.github.chiarelli.taskmanager.domain.vo.eStatusTarefaVO;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+public class Tarefa extends AbstractModelEvents implements iDefaultAggregate {
+
+  private TarefaId id;
+  private String titulo;
+  private String descricao;
+  private DataVencimentoVO dataVencimento;
+
+  private eStatusTarefaVO status;
+  private ePrioridadeVO prioridade;
+  private Long version = 0L;
+
+  private Set<ComentarioId> comentarios = new HashSet<>();
+  private Set<HistoricoId> historicos = new HashSet<>();
+
+  public Tarefa(String titulo, String descricao, DataVencimentoVO dataVencimento,
+      eStatusTarefaVO status, ePrioridadeVO prioridade, Long version) {
+    this.titulo = titulo;
+    this.descricao = descricao;
+    this.dataVencimento = dataVencimento;
+    this.status = status;
+    this.prioridade = prioridade;
+    this.version = version;
+  }
+
+  // Métodos de negócio
+  void alterarStatus(eStatusTarefaVO novoStatus, HistoricoId historicoId) {
+    if (this.status == novoStatus) {
+      throw new DomainException("Status já se encontra como '" + novoStatus + "'");
+    }
+    this.status = novoStatus;
+    this.historicos.add(historicoId); // Apenas associa o ID
+    this.version++;
+
+    var payload = new StatusTarefaAlteradoEvent.Payload(this.id, this.status);
+    this.addEvent(new StatusTarefaAlteradoEvent(this, payload));
+  }
+
+  void alterarDescricao(String novaDescricao, HistoricoId historicoId) {
+    if (Objects.equals(this.descricao, novaDescricao)) {
+      return;
+    }
+    this.descricao = novaDescricao;
+    this.historicos.add(historicoId); // Apenas associa o ID
+    this.version++;
+
+    var payload = new DescricaoTarefaAlteradaEvent.Payload(this.id, this.descricao);
+    this.addEvent(new DescricaoTarefaAlteradaEvent(this, payload));
+  }
+
+  void adicionarComentario(ComentarioId comentarioId, HistoricoId historicoId) {
+    this.comentarios.add(comentarioId);
+    this.historicos.add(historicoId); // Apenas associa o ID
+    this.version++;
+
+    this.addEvent(new ComentarioAdicionadoEvent(this, comentarioId));
+  }
+
+  void excluirTarefa() {
+    if(status != eStatusTarefaVO.PENDENTE) {
+      throw new DomainException("Tarefa com status diferente de pendente");
+    }
+    this.addEvent(new TarefaExcluidaEvent(this, this.id));
+  }
+
+  // Métodos getters
+  public Set<ComentarioId> getComentarios() {
+    return Collections.unmodifiableSet(comentarios);
+  }
+
+  public Set<HistoricoId> getHistoricos() {
+    return Collections.unmodifiableSet(historicos);
+  }
+
+  @Override
+  public String getIdAsString() {
+    return this.id.toString();
+  }
+
+}

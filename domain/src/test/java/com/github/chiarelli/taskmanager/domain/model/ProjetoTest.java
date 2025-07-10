@@ -48,7 +48,7 @@ public class ProjetoTest {
 
     projeto.adicionarTarefa(tarefaPendente);
 
-    assertThatThrownBy(projeto::removerProjeto)
+    assertThatThrownBy(projeto::excluirProjeto)
         .isInstanceOf(DomainException.class)
         .hasMessageContaining("tarefas pendentes");
   }
@@ -116,7 +116,7 @@ public class ProjetoTest {
         eStatusTarefaVO.CONCLUIDA, ePrioridadeVO.BAIXA, 0L, new HashSet<>(), new HashSet<>());
     projeto.adicionarTarefa(tarefa);
 
-    assertThatCode(projeto::removerProjeto).doesNotThrowAnyException();
+    assertThatCode(projeto::excluirProjeto).doesNotThrowAnyException();
   }
 
   @Test

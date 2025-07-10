@@ -7,7 +7,7 @@ import java.util.Set;
 
 import com.github.chiarelli.taskmanager.domain.entity.ProjetoId;
 import com.github.chiarelli.taskmanager.domain.entity.TarefaId;
-import com.github.chiarelli.taskmanager.domain.event.ProjetoRemovidoEvent;
+import com.github.chiarelli.taskmanager.domain.event.ProjetoExcluidoEvent;
 import com.github.chiarelli.taskmanager.domain.event.TarefaAdicionadaEvent;
 import com.github.chiarelli.taskmanager.domain.event.TarefaRemovidaEvent;
 import com.github.chiarelli.taskmanager.domain.exception.DomainException;
@@ -64,7 +64,7 @@ public class Projeto extends AbstractModelEvents implements iDefaultAggregate {
         .findFirst();
   }
   
-  public void removerProjeto() {
+  public void excluirProjeto() {
     boolean existeTarefaPendente = tarefas.stream()
         .anyMatch(t -> t.getStatus() == eStatusTarefaVO.PENDENTE);
 
@@ -72,7 +72,7 @@ public class Projeto extends AbstractModelEvents implements iDefaultAggregate {
       throw new DomainException("Não é possível remover o projeto: há tarefas pendentes.");
     }
 
-    this.addEvent(new ProjetoRemovidoEvent(this, this.id));
+    this.addEvent(new ProjetoExcluidoEvent(this, this.id));
   }
 
   // Metodos getters

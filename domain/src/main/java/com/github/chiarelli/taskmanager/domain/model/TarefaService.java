@@ -12,12 +12,13 @@ import com.github.chiarelli.taskmanager.domain.vo.eStatusTarefaVO;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class TarefaService {
+public class TarefaService implements iTarefaService {
 
   private final iTarefasRepository tarefaRepository;
   private final iComentariosRepository comentarioRepository;
   private final iHistoricosRepository historicoRepository;
 
+  @Override
   public void alterarStatusComHistorico(Tarefa tarefa, eStatusTarefaVO novoStatus, AutorId autor) {
     var historico = new Historico(
       new HistoricoId(),
@@ -33,6 +34,7 @@ public class TarefaService {
     historicoRepository.save(historico);
   }
 
+  @Override
   public void alterarDescricaoComHistorico(Tarefa tarefa, String novaDescricao, AutorId autor) {
     var historico = new Historico(
       new HistoricoId(),
@@ -48,6 +50,7 @@ public class TarefaService {
     historicoRepository.save(historico);
   }
 
+  @Override
   public void adicionarComentarioComHistorico(Tarefa tarefa, Comentario comentario) {
     var historico = new Historico(
       new HistoricoId(),
@@ -63,6 +66,7 @@ public class TarefaService {
     historicoRepository.save(historico);
   }
 
+  @Override
   public void excluirTarefaComHistorico(Tarefa tarefa, AutorId autor) {
     var historico = new Historico(
       new HistoricoId(),

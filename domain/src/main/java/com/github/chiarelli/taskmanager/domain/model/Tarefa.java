@@ -5,11 +5,13 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+import com.github.chiarelli.taskmanager.domain.dto.CriarTarefa;
 import com.github.chiarelli.taskmanager.domain.entity.ComentarioId;
 import com.github.chiarelli.taskmanager.domain.entity.HistoricoId;
 import com.github.chiarelli.taskmanager.domain.entity.TarefaId;
 import com.github.chiarelli.taskmanager.domain.event.ComentarioAdicionadoEvent;
 import com.github.chiarelli.taskmanager.domain.event.DescricaoTarefaAlteradaEvent;
+import com.github.chiarelli.taskmanager.domain.event.NovaTarefaCriadaEvent;
 import com.github.chiarelli.taskmanager.domain.event.StatusTarefaAlteradoEvent;
 import com.github.chiarelli.taskmanager.domain.event.TarefaExcluidaEvent;
 import com.github.chiarelli.taskmanager.domain.exception.DomainException;
@@ -49,6 +51,18 @@ public class Tarefa extends AbstractModelEvents implements iDefaultAggregate {
   }
 
   // Métodos de negócio
+  public void criarNovaTarefa(CriarTarefa data) {
+    this.id = new TarefaId();
+    this.titulo = data.titulo();
+    this.descricao = data.descricao();
+    this.dataVencimento = data.dataVencimento();
+    this.status = data.status();
+    this.prioridade = data.prioridade();
+    this.version = 0L;
+
+    this.addEvent(new NovaTarefaCriadaEvent(this, this.id));
+  }
+
   void alterarStatus(eStatusTarefaVO novoStatus, HistoricoId historicoId) {
     if (this.status == novoStatus) {
       throw new DomainException("Status já se encontra como '" + novoStatus + "'");

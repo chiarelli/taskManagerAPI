@@ -30,7 +30,7 @@ public class TarefaTest {
       new TarefaId(),
       "Titulo",
       "Descrição",
-      new DataVencimentoVO(LocalDateTime.now().plusDays(1)),
+      DataVencimentoVO.of(LocalDateTime.now().plusDays(1)),
       eStatusTarefaVO.PENDENTE,
       ePrioridadeVO.BAIXA,
       0L,

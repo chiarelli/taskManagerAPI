@@ -3,13 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>com.github.chiarelli.taskmanager</groupId>
-    <artifactId>task-manager</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-  </parent>
-
-  <groupId>com.github.chiarelli.taskmanager.infra</groupId>
+  <groupId>com.github.chiarelli.taskmanager</groupId>
   <artifactId>infra</artifactId>
   <version>0.0.1-SNAPSHOT</version>
 
@@ -23,35 +17,35 @@
   <dependencies>
     <!-- Módulos internos -->
     <dependency>
-      <groupId>com.github.chiarelli.taskmanager.domain</groupId>
+      <groupId>com.github.chiarelli.taskmanager</groupId>
       <artifactId>domain</artifactId>
       <version>${project.version}</version>
     </dependency>
 
     <dependency>
-      <groupId>com.github.chiarelli.taskmanager.application</groupId>
+      <groupId>com.github.chiarelli.taskmanager</groupId>
       <artifactId>application</artifactId>
       <version>${project.version}</version>
     </dependency>
 
-    <!-- Spring Data MongoDB -->
+    <!-- Dependencias do spring -->
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+      <version>6.1.5</version> <!-- ou versão compatível com seu projeto -->
+    </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-mongodb</artifactId>
+      <version>3.5.3</version>
     </dependency>
 
     <!-- Lombok -->
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
+      <version>1.18.30</version>
       <scope>provided</scope>
-    </dependency>
-
-    <!-- Testes -->
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
-      <scope>test</scope>
     </dependency>
   </dependencies>
 

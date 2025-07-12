@@ -32,7 +32,7 @@ public class DomainException extends RuntimeException {
     }
   }
 
-  public Map<String, Object> getUserMessages() {
+  public Map<String, Object> getViolations() {
     return userMessages;
   }
 

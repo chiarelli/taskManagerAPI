@@ -8,45 +8,40 @@ import jakarta.validation.ConstraintValidatorContext;
 
 public class DateRangeConstraint implements ConstraintValidator<DateRange, LocalDateTime> {
 
-  private LocalDateTime minDate;
-  private LocalDateTime maxDate;
+  private String minRaw;
+  private String maxRaw;
 
   @Override
   public void initialize(DateRange constraintAnnotation) {
-
-    String minRaw = constraintAnnotation.min();
-    String maxRaw = constraintAnnotation.max();
-
-    try {
-      if (minRaw == null || minRaw.isBlank() || minRaw.equals("now")) {
-        this.minDate = LocalDateTime.now();
-      } else {
-        this.minDate = LocalDateTime.parse(minRaw);
-      }
-    } catch (DateTimeParseException e) {
-      throw new IllegalArgumentException("Data mínima inválida no formato ISO-8601 (yyyy-MM-dd'T'HH:mm)");
-    }
-
-    if (maxRaw == null || maxRaw.isBlank()) {
-      this.maxDate = null; // sem limite superior
-    } else {
-      try {
-        this.maxDate = LocalDateTime.parse(maxRaw);
-      } catch (DateTimeParseException e) {
-        throw new IllegalArgumentException("Data máxima inválida no formato ISO-8601 (yyyy-MM-dd'T'HH:mm)");
-      }
-    }
+    this.minRaw = constraintAnnotation.min();
+    this.maxRaw = constraintAnnotation.max();
   }
 
   @Override
   public boolean isValid(LocalDateTime value, ConstraintValidatorContext context) {
     if (value == null)
-      return true; // deixe o @NotNull cuidar disso
+      return true;
 
-    boolean afterMin = !value.isBefore(minDate); // value >= min
-    boolean beforeMax = (maxDate == null) || !value.isAfter(maxDate); // value <= max ou sem limite
+    LocalDateTime minDate = parseDate(minRaw, true);
+    LocalDateTime maxDate = parseDate(maxRaw, false);
+
+    boolean afterMin = !value.isBefore(minDate);
+    boolean beforeMax = (maxDate == null) || !value.isAfter(maxDate);
 
     return afterMin && beforeMax;
   }
 
+  private LocalDateTime parseDate(String raw, boolean isMin) {
+    if (raw == null || raw.isBlank()) {
+      return isMin ? LocalDateTime.now() : null;
+    }
+    if (raw.equalsIgnoreCase("now")) {
+      return LocalDateTime.now();
+    }
+    try {
+      return LocalDateTime.parse(raw);
+    } catch (DateTimeParseException e) {
+      throw new IllegalArgumentException("Data inválida no formato ISO-8601: " + raw);
+    }
+  }
 }

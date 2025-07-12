@@ -13,9 +13,9 @@ import com.github.chiarelli.taskmanager.domain.event.NovaTarefaCriadaEvent;
 import com.github.chiarelli.taskmanager.domain.model.Tarefa;
 import com.github.chiarelli.taskmanager.domain.model.iDefaultAggregate;
 
-public class DomainEventsAdapter {
+public class DomainEventAdapters {
 
-  private DomainEventsAdapter() {}
+  private DomainEventAdapters() {}
 
   public static Event adapt(AbstractDomainEvent<?> event) {
     return DomainEventMapper.adapt(event);
@@ -44,7 +44,7 @@ class DomainEventMapper {
   public static Event adapt(AbstractDomainEvent<?> event) {
     try {
       String domainEventClassName = event.getClass().getSimpleName(); // Ex: ComentarioAdicionadoEvent
-      String adapterClassName = DomainEventsAdapter.class.getName() + "$" + domainEventClassName + "Adapter";
+      String adapterClassName = DomainEventAdapters.class.getName() + "$" + domainEventClassName + "Adapter";
 
       Constructor<?> ctor = constructorCache.computeIfAbsent(adapterClassName, className -> {
         try {
@@ -64,3 +64,17 @@ class DomainEventMapper {
 
   private DomainEventMapper() {}
 }
+
+/*
+Mapeador sem reflection
+
+class EventsMapperInner {
+   * 
+   static final Map<Class<?>, Function<AbstractDomainEvent<?>, Event>> adapters = Map.of(
+    
+   ComentarioAdicionadoEvent.class, ev 
+   -> new DomainEventsAdapter.ComentarioAdicionadoEventAdapter(ev.getAggregate(), ev.getPayload())
+   
+   );
+  }
+*/

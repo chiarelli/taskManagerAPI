@@ -26,6 +26,8 @@ public class DomainEventsDispatcher implements EventsDispatcher {
 
   @Override
   public void collectFrom(AbstractModelEvents... aggregates) {
+    Objects.requireNonNull(aggregates);
+    
     Arrays.stream(aggregates)
       .filter(Objects::nonNull)
       .map(AbstractModelEvents::dumpEvents)
@@ -36,7 +38,7 @@ public class DomainEventsDispatcher implements EventsDispatcher {
   @Override
   public void emitAll() {
     events.stream()
-      .map(DomainEventsAdapter::adapt)
+      .map(DomainEventAdapters::adapt)
       .forEach(eventPublisher::emit);
     events.clear();
   }

@@ -4,6 +4,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 
+import com.github.chiarelli.taskmanager.domain.validation.DateRange;
+
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -11,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public class DataVencimentoVO {
 
+  @DateRange(min = "now", message = "A data de vencimento deve ser maior que a data atual")
+  @NotNull(message = "A data de vencimento deve ser informada")
   private final LocalDateTime dataVencimento;
 
   public static DataVencimentoVO of(LocalDateTime dataVencimento) {

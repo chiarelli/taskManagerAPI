@@ -19,6 +19,11 @@ import com.github.chiarelli.taskmanager.domain.vo.DataVencimentoVO;
 import com.github.chiarelli.taskmanager.domain.vo.ePrioridadeVO;
 import com.github.chiarelli.taskmanager.domain.vo.eStatusTarefaVO;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,12 +34,26 @@ import lombok.NoArgsConstructor;
 public class Tarefa extends AbstractModelEvents implements iDefaultAggregate {
 
   private TarefaId id;
+
+  @Size(min = 8, max = 100, message = "O titulo deve ter entre 3 e 100 caracteres")
+  @NotBlank(message = "O titulo deve ser informado")
   private String titulo;
+
+  @Size(max = 1000, message = "A descricao nao pode ter mais de 1000 caracteres")
   private String descricao;
+
+  @Valid // Valida recursivamente os campos de dataVencimento ao validar Tarefa
+  @NotNull
   private DataVencimentoVO dataVencimento;
 
+  @NotNull
   private eStatusTarefaVO status;
+
+  @NotNull
   private ePrioridadeVO prioridade;
+
+  @NotNull
+  @Min(0)
   private Long version = 0L;
 
   private Set<ComentarioId> comentarios = new HashSet<>();

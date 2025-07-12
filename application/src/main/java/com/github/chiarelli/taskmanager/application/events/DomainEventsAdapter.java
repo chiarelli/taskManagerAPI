@@ -1,0 +1,66 @@
+package com.github.chiarelli.taskmanager.application.events;
+
+import java.lang.reflect.Constructor;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import com.github.chiarelli.taskmanager.application.shared.Event;
+import com.github.chiarelli.taskmanager.domain.entity.ComentarioId;
+import com.github.chiarelli.taskmanager.domain.entity.TarefaId;
+import com.github.chiarelli.taskmanager.domain.event.AbstractDomainEvent;
+import com.github.chiarelli.taskmanager.domain.event.ComentarioAdicionadoEvent;
+import com.github.chiarelli.taskmanager.domain.event.NovaTarefaCriadaEvent;
+import com.github.chiarelli.taskmanager.domain.model.Tarefa;
+import com.github.chiarelli.taskmanager.domain.model.iDefaultAggregate;
+
+public class DomainEventsAdapter {
+
+  private DomainEventsAdapter() {}
+
+  public static Event adapt(AbstractDomainEvent<?> event) {
+    return DomainEventMapper.adapt(event);
+  }
+
+  /** Eventos de domínio que serão adaptados **/
+
+  public static class NovaTarefaCriadaEventAdapter extends NovaTarefaCriadaEvent implements Event {
+    public NovaTarefaCriadaEventAdapter(iDefaultAggregate aggregate, TarefaId id) {
+      super((Tarefa)aggregate, id);
+    }    
+  }
+
+  public static class ComentarioAdicionadoEventAdapter extends ComentarioAdicionadoEvent implements Event {
+    public ComentarioAdicionadoEventAdapter(iDefaultAggregate aggregate, ComentarioId comentarioId) {
+      super(aggregate, comentarioId);
+    }    
+  }
+
+}
+
+class DomainEventMapper {
+
+  private static final Map<String, Constructor<?>> constructorCache = new ConcurrentHashMap<>();
+
+  public static Event adapt(AbstractDomainEvent<?> event) {
+    try {
+      String domainEventClassName = event.getClass().getSimpleName(); // Ex: ComentarioAdicionadoEvent
+      String adapterClassName = DomainEventsAdapter.class.getName() + "$" + domainEventClassName + "Adapter";
+
+      Constructor<?> ctor = constructorCache.computeIfAbsent(adapterClassName, className -> {
+        try {
+          Class<?> adapterClass = Class.forName(className);
+          return adapterClass.getConstructor(iDefaultAggregate.class, event.getPayload().getClass());
+        } catch (Exception e) {
+          throw new RuntimeException("Falha ao refletir classe adaptadora: " + className, e);
+        }
+      });
+
+      return (Event) ctor.newInstance(event.getAggregate(), event.getPayload());
+
+    } catch (Exception e) {
+      throw new IllegalStateException("Erro ao adaptar evento de domínio: " + event.getClass(), e);
+    }
+  }
+
+  private DomainEventMapper() {}
+}

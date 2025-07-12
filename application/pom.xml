@@ -31,11 +31,24 @@
     </dependency>
 
     <!-- Outras dependencias -->
+    <!-- https://mvnrepository.com/artifact/io.github.jkratz55/spring-mediatr -->
+    <dependency>
+      <groupId>io.github.jkratz55</groupId>
+      <artifactId>spring-mediatr</artifactId>
+      <version>2.0.0-RELEASE</version>
+    </dependency>
     
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
       <version>1.18.30</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>2.1.0-alpha1</version>
+      <type>pom</type>
     </dependency>
     
     <dependency>

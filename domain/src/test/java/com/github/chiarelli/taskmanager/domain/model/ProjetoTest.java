@@ -1,9 +1,12 @@
 package com.github.chiarelli.taskmanager.domain.model;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.HashSet;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -38,7 +41,7 @@ public class ProjetoTest {
         new TarefaId(),
         "Tarefa 1",
         "Descrição",
-        DataVencimentoVO.of(LocalDateTime.now().plusDays(1)),
+        DataVencimentoVO.of(OffsetDateTime.now().plusDays(1)),
         eStatusTarefaVO.PENDENTE,
         ePrioridadeVO.MEDIA,
         0L,
@@ -59,7 +62,7 @@ public class ProjetoTest {
         new TarefaId(),
         "Tarefa 1",
         "Descrição",
-        DataVencimentoVO.of(LocalDateTime.now().plusDays(1)),
+        DataVencimentoVO.of(OffsetDateTime.now().plusDays(1)),
         eStatusTarefaVO.PENDENTE,
         ePrioridadeVO.BAIXA,
         0L,
@@ -75,11 +78,11 @@ public class ProjetoTest {
   @Test
   void naoDeveAdicionarMaisQue20Tarefas() {
     for (int i = 0; i < 20; i++) {
-      projeto.adicionarTarefa(new Tarefa(new TarefaId(), "T" + i, "D", DataVencimentoVO.of(LocalDateTime.now()),
+      projeto.adicionarTarefa(new Tarefa(new TarefaId(), "T" + i, "D", DataVencimentoVO.of(OffsetDateTime.now()),
           eStatusTarefaVO.PENDENTE, ePrioridadeVO.MEDIA, 0L, new HashSet<>(), new HashSet<>()));
     }
 
-    Tarefa tarefaExtra = new Tarefa(new TarefaId(), "T21", "D", DataVencimentoVO.of(LocalDateTime.now()),
+    Tarefa tarefaExtra = new Tarefa(new TarefaId(), "T21", "D", DataVencimentoVO.of(OffsetDateTime.now()),
         eStatusTarefaVO.PENDENTE, ePrioridadeVO.MEDIA, 0L, new HashSet<>(), new HashSet<>());
 
     assertThatThrownBy(() -> projeto.adicionarTarefa(tarefaExtra))
@@ -91,7 +94,7 @@ public class ProjetoTest {
 
   @Test
   void deveRemoverTarefaComSucesso() {
-    Tarefa tarefa = new Tarefa(new TarefaId(), "T1", "D", DataVencimentoVO.of(LocalDateTime.now()),
+    Tarefa tarefa = new Tarefa(new TarefaId(), "T1", "D", DataVencimentoVO.of(OffsetDateTime.now()),
         eStatusTarefaVO.PENDENTE, ePrioridadeVO.ALTA, 0L, new HashSet<>(), new HashSet<>());
     projeto.adicionarTarefa(tarefa);
 
@@ -112,7 +115,7 @@ public class ProjetoTest {
 
   @Test
   void devePermitirRemoverProjetoSemTarefasPendentes() {
-    Tarefa tarefa = new Tarefa(new TarefaId(), "Tarefa", "D", DataVencimentoVO.of(LocalDateTime.now()),
+    Tarefa tarefa = new Tarefa(new TarefaId(), "Tarefa", "D", DataVencimentoVO.of(OffsetDateTime.now()),
         eStatusTarefaVO.CONCLUIDA, ePrioridadeVO.BAIXA, 0L, new HashSet<>(), new HashSet<>());
     projeto.adicionarTarefa(tarefa);
 

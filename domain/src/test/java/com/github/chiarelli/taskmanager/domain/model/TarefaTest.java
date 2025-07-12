@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -39,7 +39,7 @@ public class TarefaTest {
       new TarefaId(),
       "Titulo",
       "Descrição",
-      DataVencimentoVO.of(LocalDateTime.now().plusDays(1)),
+      DataVencimentoVO.of(OffsetDateTime.now().plusDays(1)),
       eStatusTarefaVO.PENDENTE,
       ePrioridadeVO.BAIXA,
       0L,
@@ -136,7 +136,7 @@ public class TarefaTest {
     var tarefa = new Tarefa(
       "Titulo da tarefa",
       "Descrição",
-      DataVencimentoVO.of(LocalDateTime.now().plusDays(1)),
+      DataVencimentoVO.of(OffsetDateTime.now().plusDays(1)),
       eStatusTarefaVO.PENDENTE,
       ePrioridadeVO.BAIXA,
       0L
@@ -185,7 +185,7 @@ public class TarefaTest {
     var tarefa = new Tarefa(
       "Titulo",
       "Descrição",
-      DataVencimentoVO.of(LocalDateTime.now().minusDays(1)),
+      DataVencimentoVO.of(OffsetDateTime.now().minusDays(1)),
       eStatusTarefaVO.PENDENTE,
       ePrioridadeVO.BAIXA,
       -1L

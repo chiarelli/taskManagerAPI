@@ -1,4 +1,4 @@
-package com.github.chiarelli.taskmanager.application.shared;
+package com.github.chiarelli.taskmanager.domain.event;
 
 import com.github.chiarelli.taskmanager.domain.model.AbstractModelEvents;
 

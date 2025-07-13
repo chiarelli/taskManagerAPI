@@ -71,19 +71,22 @@ public class Tarefa extends AbstractModelEvents implements iDefaultAggregate {
   }
 
   // Métodos de negócio
-  public void criarNovaTarefa(CriarTarefa data) {
-    this.id = new TarefaId();
-    this.titulo = data.titulo();
-    this.descricao = data.descricao();
-    this.dataVencimento = data.dataVencimento();
-    this.status = data.status();
-    this.prioridade = data.prioridade();
-    this.version = 0L;
+  public static Tarefa criarNovaTarefa(CriarTarefa data) {
+    var tarefa = new Tarefa();
+        tarefa.id = new TarefaId();
+        tarefa.titulo = data.titulo();
+        tarefa.descricao = data.descricao();
+        tarefa.dataVencimento = data.dataVencimento();
+        tarefa.status = data.status();
+        tarefa.prioridade = data.prioridade();
+        tarefa.version = 0L;
 
-    var payload = new NovaTarefaCriadaEvent.Payload(this.titulo, this.descricao,
-        this.dataVencimento, this.status, this.prioridade);
+    var payload = new NovaTarefaCriadaEvent.Payload(tarefa.titulo, tarefa.descricao,
+        tarefa.dataVencimento, tarefa.status, tarefa.prioridade);
 
-    this.addEvent(new NovaTarefaCriadaEvent(this, payload));
+    tarefa.addEvent(new NovaTarefaCriadaEvent(tarefa, payload));
+
+    return tarefa;
   }
 
   void alterarStatus(eStatusTarefaVO novoStatus, HistoricoId historicoId) {

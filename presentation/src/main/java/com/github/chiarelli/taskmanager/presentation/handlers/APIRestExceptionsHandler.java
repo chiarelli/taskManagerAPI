@@ -99,7 +99,7 @@ public class APIRestExceptionsHandler {
 
   @ExceptionHandler(Throwable.class)
   public ResponseEntity<Map<String, Object>> handleThrowable(Throwable ex) {
-    // Logue para investigação (log completo no back-end)
+    // TODO Logue para investigação (log completo no back-end)
     ex.printStackTrace();
 
     return ResponseEntity

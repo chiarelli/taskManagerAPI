@@ -11,6 +11,7 @@ import com.github.chiarelli.taskmanager.domain.entity.ComentarioId;
 import com.github.chiarelli.taskmanager.domain.entity.HistoricoId;
 import com.github.chiarelli.taskmanager.domain.entity.TarefaId;
 import com.github.chiarelli.taskmanager.domain.event.ComentarioAdicionadoEvent;
+import com.github.chiarelli.taskmanager.domain.event.HistoricoAdicionadoEvent;
 import com.github.chiarelli.taskmanager.domain.event.TarefaAlteradaEvent;
 import com.github.chiarelli.taskmanager.domain.event.NovaTarefaCriadaEvent;
 import com.github.chiarelli.taskmanager.domain.event.StatusTarefaAlteradoEvent;
@@ -89,24 +90,25 @@ public class Tarefa extends AbstractModelEvents implements iDefaultAggregate {
     return tarefa;
   }
 
-  void alterarStatus(eStatusTarefaVO novoStatus, HistoricoId historicoId) {
+  void alterarStatus(eStatusTarefaVO novoStatus, Historico historico) {
     if (this.status == novoStatus) {
       throw new DomainException("Status já se encontra como '" + novoStatus + "'");
     }
+    eStatusTarefaVO antigoStatus = this.status;
     this.status = novoStatus;
-    this.historicos.add(historicoId); // Apenas associa o ID
+    adicionarHistorico(historico);
     this.version++;
 
     var payload = new StatusTarefaAlteradoEvent.Payload(this.id, this.status, antigoStatus);
     this.addEvent(new StatusTarefaAlteradoEvent(this, payload));
   }
 
-  void alterarDescricao(String novaDescricao, HistoricoId historicoId) {
+  void alterarDescricao(String novaDescricao, Historico historico) {
     if (Objects.equals(this.descricao, novaDescricao)) {
       return;
     }
     this.descricao = novaDescricao;
-    this.historicos.add(historicoId); // Apenas associa o ID
+    adicionarHistorico(historico);
     this.version++;
 
     var payload = new AlterarTarefa(this.titulo, this.descricao, this.dataVencimento,
@@ -115,9 +117,9 @@ public class Tarefa extends AbstractModelEvents implements iDefaultAggregate {
     this.addEvent(new TarefaAlteradaEvent(this, payload));
   }
 
-  void adicionarComentario(ComentarioId comentarioId, HistoricoId historicoId) {
+  void adicionarComentario(ComentarioId comentarioId, Historico historico) {
     this.comentarios.add(comentarioId);
-    this.historicos.add(historicoId); // Apenas associa o ID
+    adicionarHistorico(historico);
     this.version++;
 
     this.addEvent(new ComentarioAdicionadoEvent(this, comentarioId));
@@ -131,6 +133,17 @@ public class Tarefa extends AbstractModelEvents implements iDefaultAggregate {
   }
 
   // Métodos getters
+
+  private void adicionarHistorico(Historico historico) {
+    this.historicos.add(historico.getId());
+
+    var payload = new HistoricoAdicionadoEvent.Payload(historico.getId(),
+        historico.getDataOcorrencia(), historico.getTitulo(), 
+        historico.getDescricao(), historico.getAutor());
+    
+    this.addEvent(new HistoricoAdicionadoEvent(this, payload));
+  }
+
   public Set<ComentarioId> getComentarios() {
     return Collections.unmodifiableSet(comentarios);
   }

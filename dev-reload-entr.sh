@@ -2,7 +2,8 @@
 
 # Caminho dos diretórios monitorados
 WATCH_DIRS="domain application infra"
-PRESENTATION_MODULE="presentation"
+SPRING_BOOT_MODULE="spring-boot-run"
+OUTHERS_MODULES="domain,application,infra,presentation"
 
 # Arquivo temporário com lista dos arquivos para o entr
 TMP_FILE_LIST=$(mktemp)
@@ -15,7 +16,7 @@ find $WATCH_DIRS -type f \( -name "*.java" -o -name "*.xml" \) > "$TMP_FILE_LIST
 # Função para iniciar a aplicação
 start_spring() {
   echo -e "\n➡️  Iniciando aplicação Spring Boot..."
-  mvn -pl $PRESENTATION_MODULE spring-boot:run &
+  mvn -pl $SPRING_BOOT_MODULE spring-boot:run &
   echo $! > "$SPRING_PID_FILE"
   echo "✅ Aplicação rodando com PID $(cat $SPRING_PID_FILE)"
 }
@@ -51,7 +52,7 @@ cat "$TMP_FILE_LIST" | entr -r bash -c '
   echo -e "\n📝 Alterações detectadas."
   echo "----------------------------------------"
   echo "🔧 Instalando os módulos alterados..."
-  if mvn install -pl domain,application,infra -am -DskipTests; then
+  if mvn install -pl '"$OUTHERS_MODULES"' -am -DskipTests; then
     echo "✅ Instalação bem-sucedida."
     echo "🔁 Reiniciando aplicação Spring Boot..."
 
@@ -62,11 +63,10 @@ cat "$TMP_FILE_LIST" | entr -r bash -c '
       rm -f /tmp/spring_boot_app.pid
     fi
 
-    mvn -pl '"$PRESENTATION_MODULE"' spring-boot:run &
+    mvn -pl '"$SPRING_BOOT_MODULE"' spring-boot:run &
     echo $! > /tmp/spring_boot_app.pid
     echo "✅ Aplicação reiniciada com PID $(cat /tmp/spring_boot_app.pid)"
   else
     echo "❌ Falha na instalação. Aplicação não foi reiniciada."
   fi
 '
-

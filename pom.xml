@@ -16,22 +16,15 @@
     <module>application</module>
     <module>infra</module>
     <module>presentation</module>
+    <module>spring-boot-run</module>
   </modules>
-
-  <dependencies>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-devtools</artifactId>
-      <scope>runtime</scope>
-    </dependency>
-  </dependencies>
 
   <dependencyManagement>
     <dependencies>
       <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
-        <version>3.2.5</version>
+        <version>3.5.3</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>

@@ -34,4 +34,3 @@ build/
 bootstrap/
 infra/src/main/java/com/github/chiarelli/taskmanager/infra/mock/TarefasRepositoryMock.java
 infra/src/main/java/com/github/chiarelli/taskmanager/infra/configuration/InfraConfig.java
-presentation/src/main/java/com/github/chiarelli/taskmanager/presentation/controllers/OlaController.java

@@ -1,6 +1,6 @@
 package com.github.chiarelli.taskmanager.domain.model;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 import com.github.chiarelli.taskmanager.domain.entity.AutorId;
 import com.github.chiarelli.taskmanager.domain.entity.HistoricoId;
@@ -22,13 +22,13 @@ public class TarefaService implements iTarefaService {
   public void alterarStatusComHistorico(Tarefa tarefa, eStatusTarefaVO novoStatus, AutorId autor) {
     var historico = new Historico(
       new HistoricoId(),
-      LocalDateTime.now(),
+      new Date(),
       "Alteração de Status",
       "Alterado de " + tarefa.getStatus() + " para " + novoStatus,
       autor
     );
     
-    tarefa.alterarStatus(novoStatus, historico.getId());
+    tarefa.alterarStatus(novoStatus, historico);
 
     tarefaRepository.save(tarefa);
     historicoRepository.save(historico);
@@ -38,13 +38,13 @@ public class TarefaService implements iTarefaService {
   public void alterarDescricaoComHistorico(Tarefa tarefa, String novaDescricao, AutorId autor) {
     var historico = new Historico(
       new HistoricoId(),
-      LocalDateTime.now(),
+      new Date(),
       "Alteração de Descrição",
       "Alterado de " + tarefa.getDescricao() + " para " + novaDescricao,
       autor
     );
 
-    tarefa.alterarDescricao(novaDescricao, historico.getId());
+    tarefa.alterarDescricao(novaDescricao, historico);
 
     tarefaRepository.save(tarefa);
     historicoRepository.save(historico);
@@ -54,13 +54,13 @@ public class TarefaService implements iTarefaService {
   public void adicionarComentarioComHistorico(Tarefa tarefa, Comentario comentario) {
     var historico = new Historico(
       new HistoricoId(),
-      LocalDateTime.now(),
+      new Date(),
       "Adição de Comentario",
       "Adicionado o comentario: " + comentario.getDescricao(),
       comentario.getAutor()
     );
 
-    tarefa.adicionarComentario(comentario.getId(), historico.getId());
+    tarefa.adicionarComentario(comentario.getId(), historico);
 
     comentarioRepository.save(comentario);
     historicoRepository.save(historico);
@@ -70,7 +70,7 @@ public class TarefaService implements iTarefaService {
   public void excluirTarefaComHistorico(Tarefa tarefa, AutorId autor) {
     var historico = new Historico(
       new HistoricoId(),
-      LocalDateTime.now(),
+      new Date(),
       "Exclusão de Tarefa",
       "Excluido a tarefa: " + tarefa.getDescricao(),
       autor

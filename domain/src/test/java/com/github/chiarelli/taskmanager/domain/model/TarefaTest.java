@@ -8,17 +8,19 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.OffsetDateTime;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.github.chiarelli.taskmanager.domain.entity.AutorId;
 import com.github.chiarelli.taskmanager.domain.entity.ComentarioId;
 import com.github.chiarelli.taskmanager.domain.entity.HistoricoId;
 import com.github.chiarelli.taskmanager.domain.entity.TarefaId;
 import com.github.chiarelli.taskmanager.domain.event.ComentarioAdicionadoEvent;
-import com.github.chiarelli.taskmanager.domain.event.DescricaoTarefaAlteradaEvent;
+import com.github.chiarelli.taskmanager.domain.event.TarefaAlteradaEvent;
 import com.github.chiarelli.taskmanager.domain.event.StatusTarefaAlteradoEvent;
 import com.github.chiarelli.taskmanager.domain.event.TarefaExcluidaEvent;
 import com.github.chiarelli.taskmanager.domain.exception.DomainException;
@@ -32,6 +34,7 @@ import jakarta.validation.ConstraintViolation;
 public class TarefaTest {
 
   private Tarefa tarefa;
+  private Historico historico;
 
   @BeforeEach
   void setUp() {
@@ -46,16 +49,23 @@ public class TarefaTest {
       new HashSet<>(),
       new HashSet<>()
     );
+
+    historico = new Historico(
+      new HistoricoId(),
+      new Date(),
+      "Alteração de Status",
+      "Alterado de PENDENTE para EM_ANDAMENTO",
+      new AutorId("123")
+    );
   }
 
   @Test
   void deveAlterarStatusComSucessoEEmitirEvento() {
-    var historicoId = new HistoricoId();
 
-    tarefa.alterarStatus(eStatusTarefaVO.EM_ANDAMENTO, historicoId);
+    tarefa.alterarStatus(eStatusTarefaVO.EM_ANDAMENTO, historico);
 
     assertThat(tarefa.getStatus()).isEqualTo(eStatusTarefaVO.EM_ANDAMENTO);
-    assertThat(tarefa.getHistoricos()).contains(historicoId);
+    assertThat(tarefa.getHistoricos()).contains(historico.getId());
     assertThat(tarefa.dumpEvents()).anyMatch(e -> e instanceof StatusTarefaAlteradoEvent);
     // Deve incrementar a versão
     assertThat(tarefa.getVersion()).isEqualTo(1L);
@@ -63,9 +73,8 @@ public class TarefaTest {
 
   @Test
   void deveLancarExcecaoSeStatusNaoMudar() {
-    var historicoId = new HistoricoId();
 
-    assertThatThrownBy(() -> tarefa.alterarStatus(eStatusTarefaVO.PENDENTE, historicoId))
+    assertThatThrownBy(() -> tarefa.alterarStatus(eStatusTarefaVO.PENDENTE, historico))
         .isInstanceOf(DomainException.class)
         .hasMessageContaining("Status já se encontra");
     // Versão deve manter 0
@@ -74,22 +83,20 @@ public class TarefaTest {
 
   @Test
   void deveAlterarDescricaoComSucessoEEmitirEvento() {
-    var historicoId = new HistoricoId();
     var novaDescricao = "Nova descrição";
 
-    tarefa.alterarDescricao(novaDescricao, historicoId);
+    tarefa.alterarDescricao(novaDescricao, historico);
 
     assertThat(tarefa.getDescricao()).isEqualTo(novaDescricao);
-    assertThat(tarefa.getHistoricos()).contains(historicoId);
-    assertThat(tarefa.dumpEvents()).anyMatch(e -> e instanceof DescricaoTarefaAlteradaEvent);
+    assertThat(tarefa.getHistoricos()).contains(historico.getId());
+    assertThat(tarefa.dumpEvents()).anyMatch(e -> e instanceof TarefaAlteradaEvent);
     // Deve incrementar a versão
     assertThat(tarefa.getVersion()).isEqualTo(1L);
   }
 
   @Test
   void naoDeveEmitirEventoSeDescricaoNaoMudar() {
-    var historicoId = new HistoricoId();
-    tarefa.alterarDescricao("Descrição", historicoId);
+    tarefa.alterarDescricao("Descrição", historico);
 
     assertThat(tarefa.dumpEvents()).isEmpty();
     // Versão deve manter 0
@@ -99,12 +106,11 @@ public class TarefaTest {
   @Test
   void deveAdicionarComentarioComSucessoEEmitirEvento() {
     var comentarioId = new ComentarioId();
-    var historicoId = new HistoricoId();
 
-    tarefa.adicionarComentario(comentarioId, historicoId);
+    tarefa.adicionarComentario(comentarioId, historico);
 
     assertThat(tarefa.getComentarios()).contains(comentarioId);
-    assertThat(tarefa.getHistoricos()).contains(historicoId);
+    assertThat(tarefa.getHistoricos()).contains(historico.getId());
     assertThat(tarefa.dumpEvents()).anyMatch(e -> e instanceof ComentarioAdicionadoEvent);
     // Deve incrementar a versão
     assertThat(tarefa.getVersion()).isEqualTo(1L);
@@ -119,7 +125,7 @@ public class TarefaTest {
 
    @Test
    void deveLancarExcecaoAoExcluirTarefaNaoPendente() {
-     tarefa.alterarStatus(eStatusTarefaVO.CONCLUIDA, new HistoricoId());
+     tarefa.alterarStatus(eStatusTarefaVO.CONCLUIDA, historico);
       // Versao deve alterar
      assertThat(tarefa.getVersion()).isEqualTo(1L);
      

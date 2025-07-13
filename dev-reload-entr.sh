@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Caminho dos diretórios monitorados
-WATCH_DIRS="domain application infra"
+WATCH_DIRS="domain application infra presentation"
 SPRING_BOOT_MODULE="spring-boot-run"
-OUTHERS_MODULES="domain,application,infra,presentation"
+OUTHERS_MODULES=$(echo "$WATCH_DIRS" | tr ' ' ',')
 
 # Arquivo temporário com lista dos arquivos para o entr
 TMP_FILE_LIST=$(mktemp)
@@ -11,7 +11,7 @@ TMP_FILE_LIST=$(mktemp)
 SPRING_PID_FILE="/tmp/spring_boot_app.pid"
 
 # Encontra todos os arquivos fonte relevantes
-find $WATCH_DIRS -type f \( -name "*.java" -o -name "*.xml" \) > "$TMP_FILE_LIST"
+find $WATCH_DIRS -type f \( -name "*.java" -o -name "*.xml" -o -name "*.properties" \) > "$TMP_FILE_LIST"
 
 # Função para iniciar a aplicação
 start_spring() {

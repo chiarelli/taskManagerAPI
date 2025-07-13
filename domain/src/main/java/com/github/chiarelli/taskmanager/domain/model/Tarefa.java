@@ -5,12 +5,13 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+import com.github.chiarelli.taskmanager.domain.dto.AlterarTarefa;
 import com.github.chiarelli.taskmanager.domain.dto.CriarTarefa;
 import com.github.chiarelli.taskmanager.domain.entity.ComentarioId;
 import com.github.chiarelli.taskmanager.domain.entity.HistoricoId;
 import com.github.chiarelli.taskmanager.domain.entity.TarefaId;
 import com.github.chiarelli.taskmanager.domain.event.ComentarioAdicionadoEvent;
-import com.github.chiarelli.taskmanager.domain.event.DescricaoTarefaAlteradaEvent;
+import com.github.chiarelli.taskmanager.domain.event.TarefaAlteradaEvent;
 import com.github.chiarelli.taskmanager.domain.event.NovaTarefaCriadaEvent;
 import com.github.chiarelli.taskmanager.domain.event.StatusTarefaAlteradoEvent;
 import com.github.chiarelli.taskmanager.domain.event.TarefaExcluidaEvent;
@@ -105,8 +106,10 @@ public class Tarefa extends AbstractModelEvents implements iDefaultAggregate {
     this.historicos.add(historicoId); // Apenas associa o ID
     this.version++;
 
-    var payload = new DescricaoTarefaAlteradaEvent.Payload(this.id, this.descricao);
-    this.addEvent(new DescricaoTarefaAlteradaEvent(this, payload));
+    var payload = new AlterarTarefa(this.titulo, this.descricao, this.dataVencimento,
+        this.status, this.prioridade);
+
+    this.addEvent(new TarefaAlteradaEvent(this, payload));
   }
 
   void adicionarComentario(ComentarioId comentarioId, HistoricoId historicoId) {

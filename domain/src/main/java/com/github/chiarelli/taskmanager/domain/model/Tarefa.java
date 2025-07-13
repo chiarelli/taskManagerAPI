@@ -79,7 +79,10 @@ public class Tarefa extends AbstractModelEvents implements iDefaultAggregate {
     this.prioridade = data.prioridade();
     this.version = 0L;
 
-    this.addEvent(new NovaTarefaCriadaEvent(this, this.id));
+    var payload = new NovaTarefaCriadaEvent.Payload(this.titulo, this.descricao,
+        this.dataVencimento, this.status, this.prioridade);
+
+    this.addEvent(new NovaTarefaCriadaEvent(this, payload));
   }
 
   void alterarStatus(eStatusTarefaVO novoStatus, HistoricoId historicoId) {

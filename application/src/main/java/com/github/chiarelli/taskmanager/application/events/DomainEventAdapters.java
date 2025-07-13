@@ -6,7 +6,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.github.chiarelli.taskmanager.application.shared.Event;
 import com.github.chiarelli.taskmanager.domain.entity.ComentarioId;
-import com.github.chiarelli.taskmanager.domain.entity.TarefaId;
 import com.github.chiarelli.taskmanager.domain.event.AbstractDomainEvent;
 import com.github.chiarelli.taskmanager.domain.event.ComentarioAdicionadoEvent;
 import com.github.chiarelli.taskmanager.domain.event.NovaTarefaCriadaEvent;
@@ -24,8 +23,8 @@ public class DomainEventAdapters {
   /** Eventos de domínio que serão adaptados **/
 
   public static class NovaTarefaCriadaEventAdapter extends NovaTarefaCriadaEvent implements Event {
-    public NovaTarefaCriadaEventAdapter(iDefaultAggregate aggregate, TarefaId id) {
-      super((Tarefa)aggregate, id);
+    public NovaTarefaCriadaEventAdapter(iDefaultAggregate aggregate, Payload payload) {
+      super((Tarefa)aggregate, payload);
     }    
   }
 

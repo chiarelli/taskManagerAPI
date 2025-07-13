@@ -94,7 +94,7 @@ public class Tarefa extends AbstractModelEvents implements iDefaultAggregate {
     this.historicos.add(historicoId); // Apenas associa o ID
     this.version++;
 
-    var payload = new StatusTarefaAlteradoEvent.Payload(this.id, this.status);
+    var payload = new StatusTarefaAlteradoEvent.Payload(this.id, this.status, antigoStatus);
     this.addEvent(new StatusTarefaAlteradoEvent(this, payload));
   }
 

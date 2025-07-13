@@ -10,6 +10,6 @@ public class StatusTarefaAlteradoEvent extends AbstractDomainEvent<StatusTarefaA
     super(aggregate, payload);
   }
 
-  public static record Payload(TarefaId tarefaId, eStatusTarefaVO novoStatus){}
+  public static record Payload(TarefaId tarefaId, eStatusTarefaVO novoStatus, eStatusTarefaVO antigoStatus){}
   
 }

@@ -2,56 +2,83 @@ package com.github.chiarelli.taskmanager.domain.model;
 
 import java.util.Date;
 
+import com.github.chiarelli.taskmanager.domain.dto.AlterarTarefa;
+import com.github.chiarelli.taskmanager.domain.dto.ExcluirTarefa;
+import com.github.chiarelli.taskmanager.domain.dto.ServiceResult;
 import com.github.chiarelli.taskmanager.domain.entity.AutorId;
 import com.github.chiarelli.taskmanager.domain.entity.HistoricoId;
-import com.github.chiarelli.taskmanager.domain.repository.iComentariosRepository;
-import com.github.chiarelli.taskmanager.domain.repository.iHistoricosRepository;
+import com.github.chiarelli.taskmanager.domain.entity.ProjetoId;
+import com.github.chiarelli.taskmanager.domain.entity.TarefaId;
+import com.github.chiarelli.taskmanager.domain.exception.DomainException;
+import com.github.chiarelli.taskmanager.domain.repository.iProjetoRepository;
 import com.github.chiarelli.taskmanager.domain.repository.iTarefasRepository;
-import com.github.chiarelli.taskmanager.domain.vo.eStatusTarefaVO;
+import com.github.chiarelli.taskmanager.domain.shared.ITarefaService;
+import com.github.chiarelli.taskmanager.domain.shared.iDomainEventBuffer;
 
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class TarefaService implements iTarefaService {
+public class TarefaService implements ITarefaService {
 
   private final iTarefasRepository tarefaRepository;
-  private final iComentariosRepository comentarioRepository;
-  private final iHistoricosRepository historicoRepository;
-
+  private final iProjetoRepository projetoRepository;
+  private final iDomainEventBuffer eventBuffer;
+  
   @Override
-  public void alterarStatusComHistorico(Tarefa tarefa, eStatusTarefaVO novoStatus, AutorId autor) {
+  public ServiceResult<Void> alterarStatusComHistorico(AlterarTarefa data, AutorId autor) {
+
+    var resp = loadTarefaByProjetoIdAndTarefaId(data.projetoId(), data.tarefaId());
+
+    Tarefa tarefa = resp.tarefa();
+    Projeto projeto = resp.projeto();    
+
     var historico = new Historico(
       new HistoricoId(),
       new Date(),
       "Alteração de Status",
-      "Alterado de " + tarefa.getStatus() + " para " + novoStatus,
+      "Alterado de " + tarefa.getStatus() + " para " + data.status(),
       autor
     );
     
-    tarefa.alterarStatus(novoStatus, historico);
+    projeto.alterarStatusTarefa(tarefa.getId(), data.status(), historico);
 
-    tarefaRepository.save(tarefa);
-    historicoRepository.save(historico);
+    projetoRepository.save(projeto);
+    tarefaRepository.saveHistorico(tarefa.getId(), historico);
+    
+    eventBuffer.collectFrom(projeto);
+    eventBuffer.collectFrom(tarefa);
+
+    return new ServiceResult<>(null, eventBuffer.flushEvents());
   }
-
+  
   @Override
-  public void alterarDescricaoComHistorico(Tarefa tarefa, String novaDescricao, AutorId autor) {
+  public ServiceResult<Void> alterarDescricaoComHistorico(AlterarTarefa data, AutorId autor) {
+    var resp = loadTarefaByProjetoIdAndTarefaId(data.projetoId(), data.tarefaId());
+
+    Tarefa tarefa = resp.tarefa();
+    Projeto projeto = resp.projeto();
+
     var historico = new Historico(
       new HistoricoId(),
       new Date(),
       "Alteração de Descrição",
-      "Alterado de " + tarefa.getDescricao() + " para " + novaDescricao,
+      "Alterado de " + tarefa.getDescricao() + " para " + data.descricao(),
       autor
     );
 
-    tarefa.alterarDescricao(novaDescricao, historico);
+    projeto.alterarDescricaoTarefa(tarefa.getId(), data.descricao(), historico);
 
-    tarefaRepository.save(tarefa);
-    historicoRepository.save(historico);
+    projetoRepository.save(projeto);
+    tarefaRepository.saveHistorico(tarefa.getId(), historico);
+
+    eventBuffer.collectFrom(projeto);
+    eventBuffer.collectFrom(tarefa);
+
+    return new ServiceResult<>(null, eventBuffer.flushEvents());
   }
-
+  
   @Override
-  public void adicionarComentarioComHistorico(Tarefa tarefa, Comentario comentario) {
+  public ServiceResult<Void> adicionarComentarioComHistorico(Tarefa tarefa, Comentario comentario) {
     var historico = new Historico(
       new HistoricoId(),
       new Date(),
@@ -62,12 +89,21 @@ public class TarefaService implements iTarefaService {
 
     tarefa.adicionarComentario(comentario.getId(), historico);
 
-    comentarioRepository.save(comentario);
-    historicoRepository.save(historico);
-  }
+    tarefaRepository.saveComentario(tarefa.getId(), comentario);
+    tarefaRepository.saveHistorico(tarefa.getId(), historico);
 
+    eventBuffer.collectFrom(tarefa);
+
+    return new ServiceResult<>(null, eventBuffer.flushEvents());
+  }
+  
   @Override
-  public void excluirTarefaComHistorico(Tarefa tarefa, AutorId autor) {
+  public ServiceResult<Void> excluirTarefaComHistorico(ExcluirTarefa data, AutorId autor) {
+    var resp = loadTarefaByProjetoIdAndTarefaId(data.projetoId(), data.tarefaId());
+
+    Tarefa tarefa = resp.tarefa();
+    Projeto projeto = resp.projeto();
+
     var historico = new Historico(
       new HistoricoId(),
       new Date(),
@@ -76,10 +112,32 @@ public class TarefaService implements iTarefaService {
       autor
     );
 
-    tarefa.excluirTarefa();
+    projeto.removerTarefa(data.tarefaId());
 
-    tarefaRepository.delete(tarefa);
-    historicoRepository.save(historico);
+    projetoRepository.deleteTarefa(projeto.getId(), tarefa.getId());
+    tarefaRepository.saveHistorico(tarefa.getId(), historico);
+
+    eventBuffer.collectFrom(projeto);
+    eventBuffer.collectFrom(tarefa);
+
+    return new ServiceResult<>(null, eventBuffer.flushEvents());
+  }
+
+  private ProjectWithYourTask loadTarefaByProjetoIdAndTarefaId(ProjetoId projetoId, TarefaId tarefaId) {
+    Projeto projeto = projetoRepository.findById(projetoId)
+        .orElseThrow(() -> new DomainException("Projeto %s não existe".formatted(projetoId)));
+
+    Tarefa tarefa = projeto.getTarefas().stream()
+      .filter(t -> t.getId().equals(tarefaId))  
+      .findFirst()
+      .orElseThrow(() -> new DomainException("Tarefa %s não pertence ao projeto %s".formatted(tarefaId, projetoId)));
+    
+    return new ProjectWithYourTask(projeto, tarefa);
   }
 
 }
+
+record ProjectWithYourTask(
+  Projeto projeto,
+  Tarefa tarefa
+){}

@@ -5,16 +5,14 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-import com.github.chiarelli.taskmanager.domain.dto.AlterarTarefa;
 import com.github.chiarelli.taskmanager.domain.dto.CriarTarefa;
 import com.github.chiarelli.taskmanager.domain.entity.ComentarioId;
 import com.github.chiarelli.taskmanager.domain.entity.HistoricoId;
 import com.github.chiarelli.taskmanager.domain.entity.TarefaId;
 import com.github.chiarelli.taskmanager.domain.event.ComentarioAdicionadoEvent;
 import com.github.chiarelli.taskmanager.domain.event.HistoricoAdicionadoEvent;
-import com.github.chiarelli.taskmanager.domain.event.TarefaAlteradaEvent;
-import com.github.chiarelli.taskmanager.domain.event.NovaTarefaCriadaEvent;
 import com.github.chiarelli.taskmanager.domain.event.StatusTarefaAlteradoEvent;
+import com.github.chiarelli.taskmanager.domain.event.TarefaAlteradaEvent;
 import com.github.chiarelli.taskmanager.domain.event.TarefaExcluidaEvent;
 import com.github.chiarelli.taskmanager.domain.exception.DomainException;
 import com.github.chiarelli.taskmanager.domain.vo.DataVencimentoVO;
@@ -33,7 +31,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class Tarefa extends AbstractModelEvents implements iDefaultAggregate {
+public class Tarefa extends BaseModel implements iDefaultAggregate {
 
   private TarefaId id;
 
@@ -72,25 +70,7 @@ public class Tarefa extends AbstractModelEvents implements iDefaultAggregate {
   }
 
   // Métodos de negócio
-  public static Tarefa criarNovaTarefa(CriarTarefa data) {
-    var tarefa = new Tarefa();
-        tarefa.id = new TarefaId();
-        tarefa.titulo = data.titulo();
-        tarefa.descricao = data.descricao();
-        tarefa.dataVencimento = data.dataVencimento();
-        tarefa.status = data.status();
-        tarefa.prioridade = data.prioridade();
-        tarefa.version = 0L;
-
-    var payload = new NovaTarefaCriadaEvent.Payload(tarefa.titulo, tarefa.descricao,
-        tarefa.dataVencimento, tarefa.status, tarefa.prioridade);
-
-    tarefa.addEvent(new NovaTarefaCriadaEvent(tarefa, payload));
-
-    return tarefa;
-  }
-
-  void alterarStatus(eStatusTarefaVO novoStatus, Historico historico) {
+  void alterarStatus(Projeto projeto, eStatusTarefaVO novoStatus, Historico historico) {
     if (this.status == novoStatus) {
       throw new DomainException("Status já se encontra como '" + novoStatus + "'");
     }
@@ -100,10 +80,10 @@ public class Tarefa extends AbstractModelEvents implements iDefaultAggregate {
     this.version++;
 
     var payload = new StatusTarefaAlteradoEvent.Payload(this.id, this.status, antigoStatus);
-    this.addEvent(new StatusTarefaAlteradoEvent(this, payload));
+    this.addEvent(new StatusTarefaAlteradoEvent(projeto, payload));
   }
 
-  void alterarDescricao(String novaDescricao, Historico historico) {
+  void alterarDescricao(Projeto projeto, String novaDescricao, Historico historico) {
     if (Objects.equals(this.descricao, novaDescricao)) {
       return;
     }
@@ -111,10 +91,10 @@ public class Tarefa extends AbstractModelEvents implements iDefaultAggregate {
     adicionarHistorico(historico);
     this.version++;
 
-    var payload = new AlterarTarefa(this.titulo, this.descricao, this.dataVencimento,
-        this.status, this.prioridade);
+    var payload = new TarefaAlteradaEvent.Payload(this.getId(), this.titulo, this.descricao, 
+        this.dataVencimento, this.status, this.prioridade);
 
-    this.addEvent(new TarefaAlteradaEvent(this, payload));
+    this.addEvent(new TarefaAlteradaEvent(projeto, payload));
   }
 
   void adicionarComentario(ComentarioId comentarioId, Historico historico) {
@@ -125,29 +105,42 @@ public class Tarefa extends AbstractModelEvents implements iDefaultAggregate {
     this.addEvent(new ComentarioAdicionadoEvent(this, comentarioId));
   }
 
-  void excluirTarefa() {
-    if(status != eStatusTarefaVO.PENDENTE) {
-      throw new DomainException("Tarefa com status diferente de pendente");
+  void excluirTarefa(Projeto projeto) {
+    if(status == eStatusTarefaVO.PENDENTE) {
+      throw new DomainException("Tarefa com status pendente não pode ser excluida.");
     }
-    this.addEvent(new TarefaExcluidaEvent(this, this.id));
+    this.addEvent(new TarefaExcluidaEvent(projeto, this.id));
   }
 
-  // Métodos getters
+  // Metodos auxiliares
+  static Tarefa criarNovaTarefa(CriarTarefa data) {
+    var tarefa = new Tarefa();
+        tarefa.id = new TarefaId();
+        tarefa.titulo = data.titulo();
+        tarefa.descricao = data.descricao();
+        tarefa.dataVencimento = data.dataVencimento();
+        tarefa.status = data.status();
+        tarefa.prioridade = data.prioridade();
+        tarefa.version = 0L;
+
+    return tarefa;
+  }
 
   private void adicionarHistorico(Historico historico) {
     this.historicos.add(historico.getId());
-
+    
     var payload = new HistoricoAdicionadoEvent.Payload(historico.getId(),
-        historico.getDataOcorrencia(), historico.getTitulo(), 
-        historico.getDescricao(), historico.getAutor());
+    historico.getDataOcorrencia(), historico.getTitulo(), 
+    historico.getDescricao(), historico.getAutor());
     
     this.addEvent(new HistoricoAdicionadoEvent(this, payload));
   }
-
+  
+  // Métodos getters
   public Set<ComentarioId> getComentarios() {
     return Collections.unmodifiableSet(comentarios);
   }
-
+  
   public Set<HistoricoId> getHistoricos() {
     return Collections.unmodifiableSet(historicos);
   }

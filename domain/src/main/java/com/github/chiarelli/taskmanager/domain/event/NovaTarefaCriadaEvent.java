@@ -1,18 +1,19 @@
 package com.github.chiarelli.taskmanager.domain.event;
 
-import com.github.chiarelli.taskmanager.domain.model.Tarefa;
+import com.github.chiarelli.taskmanager.domain.entity.TarefaId;
+import com.github.chiarelli.taskmanager.domain.model.Projeto;
 import com.github.chiarelli.taskmanager.domain.vo.DataVencimentoVO;
 import com.github.chiarelli.taskmanager.domain.vo.ePrioridadeVO;
 import com.github.chiarelli.taskmanager.domain.vo.eStatusTarefaVO;
 
 public class NovaTarefaCriadaEvent extends AbstractDomainEvent<NovaTarefaCriadaEvent.Payload> {
 
-  public NovaTarefaCriadaEvent(Tarefa tarefa, Payload payload) {
-    super(tarefa, payload);
+  public NovaTarefaCriadaEvent(Projeto projeto, Payload payload) {
+    super(projeto, payload);
   }
 
   public static record Payload(
-      // TarefaId e version estao na superclasse
+     TarefaId tarefaId,
       String titulo,
       String descricao,
       DataVencimentoVO dataVencimento,

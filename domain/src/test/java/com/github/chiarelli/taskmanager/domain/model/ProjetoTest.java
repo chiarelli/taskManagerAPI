@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.OffsetDateTime;
 import java.util.HashSet;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,7 +16,7 @@ import org.junit.jupiter.api.Test;
 import com.github.chiarelli.taskmanager.domain.entity.ProjetoId;
 import com.github.chiarelli.taskmanager.domain.entity.TarefaId;
 import com.github.chiarelli.taskmanager.domain.event.TarefaAdicionadaEvent;
-import com.github.chiarelli.taskmanager.domain.event.TarefaRemovidaEvent;
+import com.github.chiarelli.taskmanager.domain.event.TarefaExcluidaEvent;
 import com.github.chiarelli.taskmanager.domain.exception.DomainException;
 import com.github.chiarelli.taskmanager.domain.vo.DataVencimentoVO;
 import com.github.chiarelli.taskmanager.domain.vo.ePrioridadeVO;
@@ -72,7 +73,7 @@ public class ProjetoTest {
     projeto.adicionarTarefa(tarefa);
 
     assertTrue(projeto.getTarefas().contains(tarefa));
-    assertThat(projeto.dumpEvents()).anyMatch(e -> e instanceof TarefaAdicionadaEvent);
+    assertThat(projeto.flushEvents()).anyMatch(e -> e instanceof TarefaAdicionadaEvent);
   }
 
   @Test
@@ -89,37 +90,43 @@ public class ProjetoTest {
         .isInstanceOf(DomainException.class)
         .hasMessageContaining("Limite de tarefas");
 
-    assertThat(projeto.dumpEvents()).hasSize(20);
+    assertThat(projeto.flushEvents()).hasSize(20);
   }
 
   @Test
-  void deveRemoverTarefaComSucesso() {
+  void naoDeveRemoverTarefaPendente() {
     Tarefa tarefa = new Tarefa(new TarefaId(), "T1", "D", DataVencimentoVO.of(OffsetDateTime.now()),
         eStatusTarefaVO.PENDENTE, ePrioridadeVO.ALTA, 0L, new HashSet<>(), new HashSet<>());
     projeto.adicionarTarefa(tarefa);
 
-    assertThat(projeto.dumpEvents())
+    assertThat(projeto.flushEvents())
       .filteredOn(e -> e instanceof TarefaAdicionadaEvent)
       .anyMatch(e -> e instanceof TarefaAdicionadaEvent)
       .hasSize(1);
 
-    projeto.removerTarefa(tarefa.getId());
-
-    assertThat(projeto.dumpEvents())
-      .filteredOn(e -> e instanceof TarefaRemovidaEvent)
-      .anyMatch(e -> e instanceof TarefaRemovidaEvent)
-      .hasSize(1);
-
-    assertFalse(projeto.getTarefas().contains(tarefa));
+    assertThatThrownBy(() -> projeto.removerTarefa(tarefa.getId()))
+      .isInstanceOf(DomainException.class);
+    
   }
 
   @Test
   void devePermitirRemoverProjetoSemTarefasPendentes() {
-    Tarefa tarefa = new Tarefa(new TarefaId(), "Tarefa", "D", DataVencimentoVO.of(OffsetDateTime.now()),
+    Tarefa tarefa1 = new Tarefa(new TarefaId(), "Tarefa", "D", DataVencimentoVO.of(OffsetDateTime.now()),
         eStatusTarefaVO.CONCLUIDA, ePrioridadeVO.BAIXA, 0L, new HashSet<>(), new HashSet<>());
-    projeto.adicionarTarefa(tarefa);
+    projeto.adicionarTarefa(tarefa1);
+
+    Tarefa tarefa2 = new Tarefa(new TarefaId(), "Tarefa", "D", DataVencimentoVO.of(OffsetDateTime.now()),
+        eStatusTarefaVO.EM_ANDAMENTO, ePrioridadeVO.ALTA, 0L, new HashSet<>(), new HashSet<>());
+    projeto.adicionarTarefa(tarefa2);
 
     assertThatCode(projeto::excluirProjeto).doesNotThrowAnyException();
+
+    assertThat( Stream.concat(tarefa1.flushEvents().stream(), tarefa2.flushEvents().stream()) )
+      .filteredOn(e -> e instanceof TarefaExcluidaEvent)
+      .anyMatch(e -> e instanceof TarefaExcluidaEvent)
+      .hasSize(2);
+
+    assertFalse(projeto.getTarefas().contains(tarefa1));
   }
 
   @Test

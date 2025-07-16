@@ -1,71 +1,130 @@
 package com.github.chiarelli.taskmanager.domain.model;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.util.HashSet;
+import java.util.Optional;
 import java.util.UUID;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.github.chiarelli.taskmanager.domain.dto.AlterarTarefa;
+import com.github.chiarelli.taskmanager.domain.dto.ExcluirTarefa;
 import com.github.chiarelli.taskmanager.domain.entity.AutorId;
 import com.github.chiarelli.taskmanager.domain.entity.ComentarioId;
+import com.github.chiarelli.taskmanager.domain.entity.ProjetoId;
+import com.github.chiarelli.taskmanager.domain.entity.TarefaId;
 import com.github.chiarelli.taskmanager.domain.exception.DomainException;
-import com.github.chiarelli.taskmanager.domain.repository.iComentariosRepository;
-import com.github.chiarelli.taskmanager.domain.repository.iHistoricosRepository;
+import com.github.chiarelli.taskmanager.domain.repository.iProjetoRepository;
 import com.github.chiarelli.taskmanager.domain.repository.iTarefasRepository;
+import com.github.chiarelli.taskmanager.domain.shared.iDomainEventBuffer;
+import com.github.chiarelli.taskmanager.domain.vo.DataVencimentoVO;
+import com.github.chiarelli.taskmanager.domain.vo.ePrioridadeVO;
 import com.github.chiarelli.taskmanager.domain.vo.eStatusTarefaVO;
 
 @ExtendWith(MockitoExtension.class)
 public class TarefaServiceTest {
 
   @Mock
+  iDomainEventBuffer eventBuffer;
+
+  @Mock
   iTarefasRepository tarefaRepository;
 
   @Mock
-  iComentariosRepository comentarioRepository;
-
-  @Mock
-  iHistoricosRepository historicoRepository;
+  iProjetoRepository projetoRepository;
 
   @InjectMocks
   TarefaService tarefaService;
 
+  private Projeto projeto;
+  private Tarefa tarefa;
+
+  @BeforeEach
+  void setUp() {
+    projeto = new Projeto(
+      new ProjetoId(),
+      "Projeto X", 
+      "Descrição", 
+      0L, 
+      new HashSet<>());
+
+    tarefa = new Tarefa(
+      new TarefaId(),
+      "Titulo",
+      "Descrição",
+      DataVencimentoVO.of(OffsetDateTime.now().plusDays(1)),
+      eStatusTarefaVO.PENDENTE,
+      ePrioridadeVO.BAIXA,
+      0L,
+      new HashSet<>(),
+      new HashSet<>()
+    );
+  }
+
   @Test
   void deveAlterarStatusComSucessoEChamarRepositorios() {
-    var tarefa = mock(Tarefa.class);
+    // var tarefa = mock(Tarefa.class);
     var randomUUID = UUID.randomUUID();
     var autorId = new AutorId(randomUUID.toString());
-
     var novoStatus = eStatusTarefaVO.CONCLUIDA;
 
-    tarefaService.alterarStatusComHistorico(tarefa, novoStatus, autorId);
+      // Adicionar a tarefa ao projeto
+    projeto.adicionarTarefa(tarefa);
 
-    verify(tarefa).alterarStatus(eq(novoStatus), any());
-    verify(tarefaRepository).save(tarefa);
-    verify(historicoRepository).save(any());
+    // Simula uma consulta no banco de dados
+    when(projetoRepository.findById(projeto.getId())).thenReturn(Optional.of(projeto));
+
+    var data = new AlterarTarefa(projeto.getId(), tarefa.getId(), 
+      tarefa.getTitulo(), tarefa.getDescricao(), tarefa.getDataVencimento(), 
+      novoStatus, tarefa.getPrioridade());
+
+    tarefaService.alterarStatusComHistorico(data, autorId);
+
+    // Assert
+    assertThat(tarefa.getStatus())
+      .as("Status deve ter sido alterado")
+      .isEqualTo(novoStatus);
+
+    verify(tarefaRepository).saveHistorico(eq(tarefa.getId()), any());
   }
 
   @Test
   void deveAlterarDescricaoComSucessoEChamarRepositorios() {
-    var tarefa = mock(Tarefa.class);
     var autor = new AutorId(UUID.randomUUID().toString());
     var novaDescricao = "Nova descrição";
 
-    tarefaService.alterarDescricaoComHistorico(tarefa, novaDescricao, autor);
+     // Adicionar a tarefa ao projeto
+    projeto.adicionarTarefa(tarefa);
 
-    verify(tarefa).alterarDescricao(eq(novaDescricao), any());
-    verify(tarefaRepository).save(tarefa);
-    verify(historicoRepository).save(any());
+    // Simula uma consulta no banco de dados
+    when(projetoRepository.findById(projeto.getId())).thenReturn(Optional.of(projeto));
+
+    var data = new AlterarTarefa(projeto.getId(), tarefa.getId(), 
+      tarefa.getTitulo(), novaDescricao, tarefa.getDataVencimento(), 
+      tarefa.getStatus(), tarefa.getPrioridade());
+
+    tarefaService.alterarDescricaoComHistorico(data, autor);
+
+    assertThat(tarefa.getDescricao())
+      .as("A descrição deve ter sido alterada")
+      .contains(novaDescricao);
+
+    verify(tarefaRepository).saveHistorico(eq(tarefa.getId()), any());
   }
 
   @Test
@@ -82,35 +141,61 @@ public class TarefaServiceTest {
       tarefaService.adicionarComentarioComHistorico(tarefa, comentario);
 
       verify(tarefa).adicionarComentario(eq(comentario.getId()), any());
-      verify(comentarioRepository).save(eq(comentario));
-      verify(historicoRepository).save(any());
+      verify(tarefaRepository).saveComentario(eq(tarefa.getId()), eq(comentario));
+      verify(tarefaRepository).saveHistorico(eq(tarefa.getId()), any());
   }
 
   @Test
-  void deveExcluirTarefaComStatusPendenteEChamarRepositorios() {
-    var tarefa = mock(Tarefa.class);
+  void deveExcluirTarefaComStatusDiferenteDePendenteEChamarRepositorios() {
     var autor = new AutorId(UUID.randomUUID().toString());
+    var historico = mock(Historico.class);
 
-    tarefaService.excluirTarefaComHistorico(tarefa, autor);
+    tarefa.alterarStatus(projeto, eStatusTarefaVO.CONCLUIDA, historico);
 
-    verify(tarefa).excluirTarefa();
-    verify(tarefaRepository).delete(tarefa);
-    verify(historicoRepository).save(any());
+    // Adicionar a tarefa ao projeto
+    projeto.adicionarTarefa(tarefa);
+
+    // Simula uma consulta no banco de dados
+    when(projetoRepository.findById(projeto.getId())).thenReturn(Optional.of(projeto));
+
+    var data = new ExcluirTarefa(projeto.getId(), tarefa.getId());
+    tarefaService.excluirTarefaComHistorico(data, autor);
+
+    // Assert
+    assertThat(projeto.getTarefas())
+      .as("a tarefa deve ser removida do projeto após exclusão")
+      .doesNotContain(tarefa);
+
+    verify(projetoRepository).deleteTarefa(projeto.getId(), tarefa.getId());
+    verify(tarefaRepository).saveHistorico(eq(tarefa.getId()), any());
   }
 
   @Test
   void devePropagarExcecaoAoExcluirTarefaComStatusInvalido() {
-    var tarefa = mock(Tarefa.class);
-    var autor = new AutorId(UUID.randomUUID().toString());
+    // Arrange
+    AutorId autorId = new AutorId(UUID.randomUUID().toString());
 
-    doThrow(new DomainException("erro")).when(tarefa).excluirTarefa();
+    // Adicionar a tarefa ao projeto
+    projeto.adicionarTarefa(tarefa);
 
-    assertThatThrownBy(() -> tarefaService.excluirTarefaComHistorico(tarefa, autor))
-        .isInstanceOf(DomainException.class)
-        .hasMessage("erro");
+    // Simula uma consulta no banco de dados
+    when(projetoRepository.findById(projeto.getId())).thenReturn(Optional.of(projeto));
 
-    verify(tarefaRepository, never()).delete(any());
-    verify(historicoRepository, never()).save(any());
+    // Assert - a exclusão deve lançar a exceção
+    assertThatThrownBy(() -> {
+        var data = new ExcluirTarefa(projeto.getId(), tarefa.getId());
+        tarefaService.excluirTarefaComHistorico(data, autorId);
+    })
+    .isInstanceOf(DomainException.class)
+    .hasMessage("Tarefa com status pendente não pode ser excluida.");
+
+    // Verifica que a tarefa *ainda está presente* no projeto
+    assertThat(projeto.getTarefas())
+      .as("A tarefa não deveria ter sido removida do projeto")
+      .contains(tarefa);
+
+    verify(projetoRepository, never()).deleteTarefa(projeto.getId(), tarefa.getId());
+    verify(tarefaRepository, never()).saveHistorico(eq(tarefa.getId()), any());
   }
 
 }

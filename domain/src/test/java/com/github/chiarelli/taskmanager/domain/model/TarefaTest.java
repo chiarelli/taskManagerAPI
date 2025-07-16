@@ -20,8 +20,8 @@ import com.github.chiarelli.taskmanager.domain.entity.ComentarioId;
 import com.github.chiarelli.taskmanager.domain.entity.HistoricoId;
 import com.github.chiarelli.taskmanager.domain.entity.TarefaId;
 import com.github.chiarelli.taskmanager.domain.event.ComentarioAdicionadoEvent;
-import com.github.chiarelli.taskmanager.domain.event.TarefaAlteradaEvent;
 import com.github.chiarelli.taskmanager.domain.event.StatusTarefaAlteradoEvent;
+import com.github.chiarelli.taskmanager.domain.event.TarefaAlteradaEvent;
 import com.github.chiarelli.taskmanager.domain.event.TarefaExcluidaEvent;
 import com.github.chiarelli.taskmanager.domain.exception.DomainException;
 import com.github.chiarelli.taskmanager.domain.validation.GenericValidator;
@@ -33,6 +33,7 @@ import jakarta.validation.ConstraintViolation;
 
 public class TarefaTest {
 
+  private Projeto projeto;
   private Tarefa tarefa;
   private Historico historico;
 
@@ -57,16 +58,18 @@ public class TarefaTest {
       "Alterado de PENDENTE para EM_ANDAMENTO",
       new AutorId("123")
     );
+
+    projeto = new Projeto("Projeto teste", "Um projeto apenas para testes.");
   }
 
   @Test
   void deveAlterarStatusComSucessoEEmitirEvento() {
 
-    tarefa.alterarStatus(eStatusTarefaVO.EM_ANDAMENTO, historico);
+    tarefa.alterarStatus(projeto, eStatusTarefaVO.EM_ANDAMENTO, historico);
 
     assertThat(tarefa.getStatus()).isEqualTo(eStatusTarefaVO.EM_ANDAMENTO);
     assertThat(tarefa.getHistoricos()).contains(historico.getId());
-    assertThat(tarefa.dumpEvents()).anyMatch(e -> e instanceof StatusTarefaAlteradoEvent);
+    assertThat(tarefa.flushEvents()).anyMatch(e -> e instanceof StatusTarefaAlteradoEvent);
     // Deve incrementar a versão
     assertThat(tarefa.getVersion()).isEqualTo(1L);
   }
@@ -74,7 +77,7 @@ public class TarefaTest {
   @Test
   void deveLancarExcecaoSeStatusNaoMudar() {
 
-    assertThatThrownBy(() -> tarefa.alterarStatus(eStatusTarefaVO.PENDENTE, historico))
+    assertThatThrownBy(() -> tarefa.alterarStatus(projeto, eStatusTarefaVO.PENDENTE, historico))
         .isInstanceOf(DomainException.class)
         .hasMessageContaining("Status já se encontra");
     // Versão deve manter 0
@@ -85,20 +88,20 @@ public class TarefaTest {
   void deveAlterarDescricaoComSucessoEEmitirEvento() {
     var novaDescricao = "Nova descrição";
 
-    tarefa.alterarDescricao(novaDescricao, historico);
+    tarefa.alterarDescricao(projeto, novaDescricao, historico);
 
     assertThat(tarefa.getDescricao()).isEqualTo(novaDescricao);
     assertThat(tarefa.getHistoricos()).contains(historico.getId());
-    assertThat(tarefa.dumpEvents()).anyMatch(e -> e instanceof TarefaAlteradaEvent);
+    assertThat(tarefa.flushEvents()).anyMatch(e -> e instanceof TarefaAlteradaEvent);
     // Deve incrementar a versão
     assertThat(tarefa.getVersion()).isEqualTo(1L);
   }
 
   @Test
   void naoDeveEmitirEventoSeDescricaoNaoMudar() {
-    tarefa.alterarDescricao("Descrição", historico);
+    tarefa.alterarDescricao(projeto, "Descrição", historico);
 
-    assertThat(tarefa.dumpEvents()).isEmpty();
+    assertThat(tarefa.flushEvents()).isEmpty();
     // Versão deve manter 0
     assertThat(tarefa.getVersion()).isEqualTo(0L);
   }
@@ -111,29 +114,30 @@ public class TarefaTest {
 
     assertThat(tarefa.getComentarios()).contains(comentarioId);
     assertThat(tarefa.getHistoricos()).contains(historico.getId());
-    assertThat(tarefa.dumpEvents()).anyMatch(e -> e instanceof ComentarioAdicionadoEvent);
+    assertThat(tarefa.flushEvents()).anyMatch(e -> e instanceof ComentarioAdicionadoEvent);
     // Deve incrementar a versão
     assertThat(tarefa.getVersion()).isEqualTo(1L);
   }
 
-   @Test
-   void devePermitirExclusaoSeStatusPendente() {
-     tarefa.excluirTarefa();
+  @Test
+  void deveLancarExcecaoExcluirTarefaStatusPendente() {
+    assertThatThrownBy(() -> tarefa.excluirTarefa(projeto) )
+      .isInstanceOf(DomainException.class)
+     .hasMessageContaining("Tarefa com status pendente não pode ser excluida");
 
-     assertThat(tarefa.dumpEvents()).anyMatch(e -> e instanceof TarefaExcluidaEvent);
-   }
+    assertThat(tarefa.flushEvents()).noneMatch(e -> e instanceof TarefaExcluidaEvent);
+  }
 
    @Test
-   void deveLancarExcecaoAoExcluirTarefaNaoPendente() {
-     tarefa.alterarStatus(eStatusTarefaVO.CONCLUIDA, historico);
-      // Versao deve alterar
+   void deveExcluirTarefaNaoPendente() {
+     tarefa.alterarStatus(projeto, eStatusTarefaVO.CONCLUIDA, historico);
+
+     // Versao deve alterar
      assertThat(tarefa.getVersion()).isEqualTo(1L);
      
-     assertThatThrownBy(() -> tarefa.excluirTarefa())
-     .isInstanceOf(DomainException.class)
-     .hasMessageContaining("Tarefa com status diferente de pendente");
-     // Versão deve manter 1
-     assertThat(tarefa.getVersion()).isEqualTo(1L);
+     tarefa.excluirTarefa(projeto);
+     
+     assertThat(tarefa.flushEvents()).anyMatch(e -> e instanceof TarefaExcluidaEvent);
    }
 
   @Test

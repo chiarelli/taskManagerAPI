@@ -9,7 +9,7 @@ import com.github.chiarelli.taskmanager.domain.entity.ComentarioId;
 import com.github.chiarelli.taskmanager.domain.event.AbstractDomainEvent;
 import com.github.chiarelli.taskmanager.domain.event.ComentarioAdicionadoEvent;
 import com.github.chiarelli.taskmanager.domain.event.NovaTarefaCriadaEvent;
-import com.github.chiarelli.taskmanager.domain.model.Tarefa;
+import com.github.chiarelli.taskmanager.domain.model.Projeto;
 import com.github.chiarelli.taskmanager.domain.model.iDefaultAggregate;
 
 public class DomainEventAdapters {
@@ -24,7 +24,7 @@ public class DomainEventAdapters {
 
   public static class NovaTarefaCriadaEventAdapter extends NovaTarefaCriadaEvent implements Event {
     public NovaTarefaCriadaEventAdapter(iDefaultAggregate aggregate, Payload payload) {
-      super((Tarefa)aggregate, payload);
+      super((Projeto) aggregate, payload);
     }    
   }
 

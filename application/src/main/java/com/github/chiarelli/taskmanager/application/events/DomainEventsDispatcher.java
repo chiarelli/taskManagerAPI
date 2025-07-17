@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.github.chiarelli.taskmanager.application.shared.EventsDispatcher;
 import com.github.chiarelli.taskmanager.domain.event.AbstractDomainEvent;
-import com.github.chiarelli.taskmanager.domain.model.AbstractModelEvents;
+import com.github.chiarelli.taskmanager.domain.model.BaseModel;
 
 import io.github.jkratz55.mediator.core.Mediator;
 
@@ -25,12 +25,12 @@ public class DomainEventsDispatcher implements EventsDispatcher {
   }
 
   @Override
-  public void collectFrom(AbstractModelEvents... aggregates) {
+  public void collectFrom(BaseModel... aggregates) {
     Objects.requireNonNull(aggregates);
     
     Arrays.stream(aggregates)
       .filter(Objects::nonNull)
-      .map(AbstractModelEvents::dumpEvents)
+      .map(BaseModel::flushEvents)
       .flatMap(Collection::stream)
       .forEach(events::add);
   }

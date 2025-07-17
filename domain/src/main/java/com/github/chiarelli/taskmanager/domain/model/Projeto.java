@@ -56,6 +56,7 @@ public class Projeto extends BaseModel implements iDefaultAggregate {
 
   public static Projeto criarNovoProjeto(CriarProjeto data) {
     var projeto = new Projeto(data.titulo(), data.descricao());
+        projeto.id = new ProjetoId();
 
     var payload = new ProjetoCriadoEvent.Payload(projeto.getTitulo(), projeto.getDescricao());
     projeto.addEvent(new ProjetoCriadoEvent(projeto, payload));

@@ -10,6 +10,7 @@ import com.github.chiarelli.taskmanager.domain.event.AbstractDomainEvent;
 import com.github.chiarelli.taskmanager.domain.event.ComentarioAdicionadoEvent;
 import com.github.chiarelli.taskmanager.domain.event.NovaTarefaCriadaEvent;
 import com.github.chiarelli.taskmanager.domain.model.Projeto;
+import com.github.chiarelli.taskmanager.domain.model.ProjetoCriadoEvent;
 import com.github.chiarelli.taskmanager.domain.model.iDefaultAggregate;
 
 public class DomainEventAdapters {
@@ -32,6 +33,12 @@ public class DomainEventAdapters {
     public ComentarioAdicionadoEventAdapter(iDefaultAggregate aggregate, ComentarioId comentarioId) {
       super(aggregate, comentarioId);
     }    
+  }
+
+  public static class ProjetoCriadoEventAdapter extends ProjetoCriadoEvent implements Event {
+    public ProjetoCriadoEventAdapter(iDefaultAggregate projeto, Payload payload) {
+      super((Projeto) projeto, payload);
+    }
   }
 
 }

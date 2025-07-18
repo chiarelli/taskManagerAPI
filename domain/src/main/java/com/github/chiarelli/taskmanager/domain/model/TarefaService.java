@@ -1,5 +1,6 @@
 package com.github.chiarelli.taskmanager.domain.model;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 import com.github.chiarelli.taskmanager.domain.dto.AlterarTarefa;
@@ -9,6 +10,7 @@ import com.github.chiarelli.taskmanager.domain.entity.AutorId;
 import com.github.chiarelli.taskmanager.domain.entity.HistoricoId;
 import com.github.chiarelli.taskmanager.domain.entity.ProjetoId;
 import com.github.chiarelli.taskmanager.domain.entity.TarefaId;
+import com.github.chiarelli.taskmanager.domain.event.HistoricoAdicionadoEvent;
 import com.github.chiarelli.taskmanager.domain.exception.DomainException;
 import com.github.chiarelli.taskmanager.domain.repository.iProjetoRepository;
 import com.github.chiarelli.taskmanager.domain.repository.iTarefasRepository;
@@ -94,7 +96,15 @@ public class TarefaService implements ITarefaService {
 
     eventBuffer.collectFrom(tarefa);
 
-    return new ServiceResult<>(null, eventBuffer.flushEvents());
+    var payload = new HistoricoAdicionadoEvent.Payload(historico.getId(),
+        historico.getDataOcorrencia(), historico.getTitulo(), 
+        historico.getDescricao(), historico.getAutor());
+    
+    var events = new ArrayList<>(eventBuffer.flushEvents());
+
+    events.add(new HistoricoAdicionadoEvent(tarefa, payload)); // Adiciona o evento de histórico
+
+    return new ServiceResult<>(null, events);
   }
   
   @Override
@@ -120,7 +130,15 @@ public class TarefaService implements ITarefaService {
     eventBuffer.collectFrom(projeto);
     eventBuffer.collectFrom(tarefa);
 
-    return new ServiceResult<>(null, eventBuffer.flushEvents());
+    var payload = new HistoricoAdicionadoEvent.Payload(historico.getId(),
+        historico.getDataOcorrencia(), historico.getTitulo(), 
+        historico.getDescricao(), historico.getAutor());
+    
+    var events = new ArrayList<>(eventBuffer.flushEvents());
+
+    events.add(new HistoricoAdicionadoEvent(tarefa, payload)); // Adiciona o evento de histórico
+
+    return new ServiceResult<>(null, events);
   }
 
   private ProjectWithYourTask loadTarefaByProjetoIdAndTarefaId(ProjetoId projetoId, TarefaId tarefaId) {

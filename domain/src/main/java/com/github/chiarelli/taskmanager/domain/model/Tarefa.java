@@ -97,12 +97,16 @@ public class Tarefa extends BaseModel implements iDefaultAggregate {
     this.addEvent(new TarefaAlteradaEvent(projeto, payload));
   }
 
-  void adicionarComentario(ComentarioId comentarioId, Historico historico) {
-    this.comentarios.add(comentarioId);
+  void adicionarComentario(Comentario comentario, Historico historico) {
+    this.comentarios.add(comentario.getId());
     adicionarHistorico(historico);
     this.version++;
 
-    this.addEvent(new ComentarioAdicionadoEvent(this, comentarioId));
+    var payload = new ComentarioAdicionadoEvent.Payload(comentario.getId(),
+        comentario.getDataCriacao(), comentario.getTitulo(), 
+        comentario.getDescricao(), comentario.getAutor());
+
+    this.addEvent(new ComentarioAdicionadoEvent(this, payload));
   }
 
   void excluirTarefa(Projeto projeto) {

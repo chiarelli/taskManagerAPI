@@ -161,7 +161,7 @@ public class TarefaServiceTest {
 
       tarefaService.adicionarComentarioComHistorico(tarefa, comentario);
 
-      verify(tarefa).adicionarComentario(eq(comentario.getId()), any());
+      verify(tarefa).adicionarComentario(eq(comentario), any());
       verify(tarefaRepository).saveComentario(eq(tarefa.getId()), eq(comentario));
       verify(tarefaRepository).saveHistorico(eq(tarefa.getId()), any());
   }

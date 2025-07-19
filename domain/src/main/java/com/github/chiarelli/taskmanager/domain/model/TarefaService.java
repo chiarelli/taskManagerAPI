@@ -89,7 +89,7 @@ public class TarefaService implements ITarefaService {
       comentario.getAutor()
     );
 
-    tarefa.adicionarComentario(comentario.getId(), historico);
+    tarefa.adicionarComentario(comentario, historico);
 
     tarefaRepository.saveComentario(tarefa.getId(), comentario);
     tarefaRepository.saveHistorico(tarefa.getId(), historico);

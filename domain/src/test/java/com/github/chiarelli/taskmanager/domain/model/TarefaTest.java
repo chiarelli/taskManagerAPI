@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import java.time.OffsetDateTime;
 import java.util.Date;
@@ -16,7 +17,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.github.chiarelli.taskmanager.domain.entity.AutorId;
-import com.github.chiarelli.taskmanager.domain.entity.ComentarioId;
 import com.github.chiarelli.taskmanager.domain.entity.HistoricoId;
 import com.github.chiarelli.taskmanager.domain.entity.TarefaId;
 import com.github.chiarelli.taskmanager.domain.event.ComentarioAdicionadoEvent;
@@ -108,11 +108,11 @@ public class TarefaTest {
 
   @Test
   void deveAdicionarComentarioComSucessoEEmitirEvento() {
-    var comentarioId = new ComentarioId();
+    var comentario = mock(Comentario.class);
 
-    tarefa.adicionarComentario(comentarioId, historico);
+    tarefa.adicionarComentario(comentario, historico);
 
-    assertThat(tarefa.getComentarios()).contains(comentarioId);
+    assertThat(tarefa.getComentarios()).contains(comentario.getId());
     assertThat(tarefa.getHistoricos()).contains(historico.getId());
     assertThat(tarefa.flushEvents()).anyMatch(e -> e instanceof ComentarioAdicionadoEvent);
     // Deve incrementar a versão

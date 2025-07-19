@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 
 import com.github.chiarelli.taskmanager.domain.entity.ProjetoId;
 import com.github.chiarelli.taskmanager.domain.entity.TarefaId;
+import com.github.chiarelli.taskmanager.domain.event.ProjetoExcluidoEvent;
 import com.github.chiarelli.taskmanager.domain.event.TarefaAdicionadaEvent;
 import com.github.chiarelli.taskmanager.domain.event.TarefaExcluidaEvent;
 import com.github.chiarelli.taskmanager.domain.exception.DomainException;
@@ -55,6 +56,9 @@ public class ProjetoTest {
     assertThatThrownBy(projeto::excluirProjeto)
         .isInstanceOf(DomainException.class)
         .hasMessageContaining("tarefas pendentes");
+
+    assertThat(projeto.flushEvents()).noneMatch(e -> e instanceof TarefaExcluidaEvent);
+    assertThat(projeto.flushEvents()).noneMatch(e -> e instanceof ProjetoExcluidoEvent);
   }
 
   @Test
@@ -90,7 +94,9 @@ public class ProjetoTest {
         .isInstanceOf(DomainException.class)
         .hasMessageContaining("Limite de tarefas");
 
-    assertThat(projeto.flushEvents()).hasSize(20);
+    assertThat(projeto.flushEvents())
+      .hasSize(20)
+      .anyMatch(e -> e instanceof TarefaAdicionadaEvent);
   }
 
   @Test
@@ -100,7 +106,6 @@ public class ProjetoTest {
     projeto.adicionarTarefa(tarefa);
 
     assertThat(projeto.flushEvents())
-      .filteredOn(e -> e instanceof TarefaAdicionadaEvent)
       .anyMatch(e -> e instanceof TarefaAdicionadaEvent)
       .hasSize(1);
 
@@ -121,6 +126,17 @@ public class ProjetoTest {
 
     assertThatCode(projeto::excluirProjeto).doesNotThrowAnyException();
 
+    var projectEvents = projeto.flushEvents();
+    assertThat(projectEvents)
+      .filteredOn(e -> e instanceof TarefaAdicionadaEvent)
+      .anyMatch(e -> e instanceof TarefaAdicionadaEvent)
+      .hasSize(2);
+
+    assertThat(projectEvents)
+      .filteredOn(e -> e instanceof ProjetoExcluidoEvent)
+      .anyMatch(e -> e instanceof ProjetoExcluidoEvent)
+      .hasSize(1);
+
     assertThat( Stream.concat(tarefa1.flushEvents().stream(), tarefa2.flushEvents().stream()) )
       .filteredOn(e -> e instanceof TarefaExcluidaEvent)
       .anyMatch(e -> e instanceof TarefaExcluidaEvent)
@@ -136,6 +152,8 @@ public class ProjetoTest {
     assertThatThrownBy(() -> projeto.removerTarefa(inexistente))
         .isInstanceOf(DomainException.class)
         .hasMessageContaining("não pertence ao projeto");
+
+    assertThat(projeto.flushEvents()).isEmpty();
   }
 
 

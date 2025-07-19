@@ -77,6 +77,8 @@ public class TarefaTest {
   @Test
   void deveLancarExcecaoSeStatusNaoMudar() {
 
+    assertThat(tarefa.flushEvents()).noneMatch(e -> e instanceof StatusTarefaAlteradoEvent);
+
     assertThatThrownBy(() -> tarefa.alterarStatus(projeto, eStatusTarefaVO.PENDENTE, historico))
         .isInstanceOf(DomainException.class)
         .hasMessageContaining("Status já se encontra");

@@ -67,10 +67,13 @@ public class Projeto extends BaseModel implements iDefaultAggregate {
   public void alterarDadosDoProjeto(AlterarProjeto data) {
     this.titulo = data.titulo();
     this.descricao = data.descricao();
+    
+    if(this.titulo.equals(data.titulo()) && this.descricao.equals(data.descricao())) {
+      return; // Não houve alteração  
+    }
     this.version++;
 
     var payload = new ProjetoAlteradoEvent.Payload(this.titulo, this.descricao);
-
     this.addEvent(new ProjetoAlteradoEvent(this, payload));
   }
   
@@ -81,6 +84,8 @@ public class Projeto extends BaseModel implements iDefaultAggregate {
     if (existeTarefaPendente) {
       throw new DomainException("Não é possível remover o projeto: há tarefas pendentes.");
     }
+
+    this.version++;
 
     Set.copyOf(tarefas).forEach(t -> this.removerTarefa(t.getId())); // Exclui todas as tarefas antes de excluir o projeto
 
@@ -93,6 +98,7 @@ public class Projeto extends BaseModel implements iDefaultAggregate {
     canAddOneMoreTarefa(); // Verifica se pode adicionar mais uma tarefa
 
     this.tarefas.add(novaTarefa);
+    this.version++;
 
     this.addEvent(new TarefaAdicionadaEvent(this, novaTarefa.getId()));
   }
@@ -101,6 +107,7 @@ public class Projeto extends BaseModel implements iDefaultAggregate {
     getTarefaOrThrow(tarefaId)    
         .excluirTarefa(this);
 
+    this.version++;
     this.tarefas.removeIf(t -> t.getId().equals(tarefaId));
   }
 
@@ -114,7 +121,6 @@ public class Projeto extends BaseModel implements iDefaultAggregate {
       data.dataVencimento(),
       data.status(),
       data.prioridade(),
-      0L,
       new HashSet<>(),
       new HashSet<>()
     );
@@ -124,9 +130,9 @@ public class Projeto extends BaseModel implements iDefaultAggregate {
         tarefa.getDescricao(), tarefa.getDataVencimento(), 
         tarefa.getStatus(), tarefa.getPrioridade()
       );
-
-    tarefa.addEvent(new NovaTarefaCriadaEvent(this, payload));
-
+      tarefa.addEvent(new NovaTarefaCriadaEvent(this, payload));
+      
+    // A versão do projeto é incrementada em "adicionarTarefa(tarefa)"
     this.adicionarTarefa(tarefa);
 
     return tarefa;
@@ -135,11 +141,13 @@ public class Projeto extends BaseModel implements iDefaultAggregate {
   void alterarStatusTarefa(TarefaId tarefaId, eStatusTarefaVO novoStatus, Historico historico) {
     getTarefaOrThrow(tarefaId)
         .alterarStatus(this, novoStatus, historico);
+    this.version++;
   }
 
   void alterarDescricaoTarefa(TarefaId tarefaId, String novaDescricao, Historico historico) {
     getTarefaOrThrow(tarefaId)
         .alterarDescricao(this, novaDescricao, historico);
+    this.version++;
   }
 
   private Tarefa getTarefaOrThrow(TarefaId tarefaId) {

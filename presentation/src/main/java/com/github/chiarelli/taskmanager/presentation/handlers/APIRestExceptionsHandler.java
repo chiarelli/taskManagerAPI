@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
+import com.github.chiarelli.taskmanager.application.exceptions.NotFoundException;
 import com.github.chiarelli.taskmanager.domain.exception.DomainException;
 import com.github.chiarelli.taskmanager.presentation.dtos.BadRequestResponse;
 
@@ -25,6 +26,12 @@ public class APIRestExceptionsHandler {
   public ResponseEntity<BadRequestResponse> handleUIException(DomainException ex) {
     var badResp = new BadRequestResponse(ex.getViolations());
     return new ResponseEntity<>(badResp, HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(NotFoundException.class)
+  public ResponseEntity<BadRequestResponse> handleNotFoundException(NotFoundException ex) {
+    var badResp = new BadRequestResponse(Map.of("not_found", ex.getMessage()));
+    return new ResponseEntity<>(badResp, HttpStatus.NOT_FOUND);
   }
 
   @ExceptionHandler(HttpMessageNotReadableException.class)

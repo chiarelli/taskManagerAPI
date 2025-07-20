@@ -8,9 +8,9 @@ import com.github.chiarelli.taskmanager.application.events.DomainEventAdapters.N
 import com.github.chiarelli.taskmanager.application.shared.EventHandler;
 
 @Component
-class TarefaCriadaEventsLogger implements EventHandler<NovaTarefaCriadaEventAdapter> {
+class NovaTarefaCriadaEventsLogger implements EventHandler<NovaTarefaCriadaEventAdapter> {
 
-  private static final Logger logger = LoggerFactory.getLogger(TarefaCriadaEventsLogger.class);
+  private static final Logger logger = LoggerFactory.getLogger(NovaTarefaCriadaEventsLogger.class);
 
   @Override
   public void handle(NovaTarefaCriadaEventAdapter event) {

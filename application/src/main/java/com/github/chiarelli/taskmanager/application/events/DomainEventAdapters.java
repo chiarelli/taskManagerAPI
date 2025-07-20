@@ -38,6 +38,12 @@ public class DomainEventAdapters {
     }
   }
 
+  public static class ProjetoAlteradoEventAdapter extends ProjetoAlteradoEvent implements Event {
+    public ProjetoAlteradoEventAdapter(iDefaultAggregate projeto, Payload payload) {
+      super((Projeto) projeto, payload);
+    }
+  }
+
 }
 
 class DomainEventMapper {

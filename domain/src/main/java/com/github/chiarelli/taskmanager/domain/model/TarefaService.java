@@ -80,7 +80,12 @@ public class TarefaService implements ITarefaService {
   }
   
   @Override
-  public ServiceResult<Void> adicionarComentarioComHistorico(Tarefa tarefa, Comentario comentario) {
+  public ServiceResult<Void> adicionarComentarioComHistorico(ProjetoId projetoId, TarefaId tarefaId, Comentario comentario) {
+    var resp = loadTarefaByProjetoIdAndTarefaId(projetoId, tarefaId);
+
+    Tarefa tarefa = resp.tarefa();
+    Projeto projeto = resp.projeto();
+
     var historico = new Historico(
       new HistoricoId(),
       new Date(),
@@ -89,20 +94,20 @@ public class TarefaService implements ITarefaService {
       comentario.getAutor()
     );
 
-    tarefa.adicionarComentario(comentario, historico);
+    tarefa.adicionarComentario(projeto, comentario, historico);
 
     tarefaRepository.saveComentario(tarefa.getId(), comentario);
     tarefaRepository.saveHistorico(tarefa.getId(), historico);
 
     eventBuffer.collectFrom(tarefa);
 
-    var payload = new HistoricoAdicionadoEvent.Payload(historico.getId(),
+    var payload = new HistoricoAdicionadoEvent.Payload(tarefaId, historico.getId(),
         historico.getDataOcorrencia(), historico.getTitulo(), 
         historico.getDescricao(), historico.getAutor());
     
     var events = new ArrayList<>(eventBuffer.flushEvents());
 
-    events.add(new HistoricoAdicionadoEvent(tarefa, payload)); // Adiciona o evento de histórico
+    events.add(new HistoricoAdicionadoEvent(projeto, payload)); // Adiciona o evento de histórico
 
     return new ServiceResult<>(null, events);
   }
@@ -130,13 +135,13 @@ public class TarefaService implements ITarefaService {
     eventBuffer.collectFrom(projeto);
     eventBuffer.collectFrom(tarefa);
 
-    var payload = new HistoricoAdicionadoEvent.Payload(historico.getId(),
+    var payload = new HistoricoAdicionadoEvent.Payload(tarefa.getId(), historico.getId(),
         historico.getDataOcorrencia(), historico.getTitulo(), 
         historico.getDescricao(), historico.getAutor());
     
     var events = new ArrayList<>(eventBuffer.flushEvents());
 
-    events.add(new HistoricoAdicionadoEvent(tarefa, payload)); // Adiciona o evento de histórico
+    events.add(new HistoricoAdicionadoEvent(projeto, payload)); // Adiciona o evento de histórico
 
     return new ServiceResult<>(null, events);
   }

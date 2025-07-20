@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import com.github.chiarelli.taskmanager.domain.entity.AutorId;
 import com.github.chiarelli.taskmanager.domain.entity.ComentarioId;
+import com.github.chiarelli.taskmanager.domain.entity.TarefaId;
 import com.github.chiarelli.taskmanager.domain.model.iDefaultAggregate;
 
 public class ComentarioAdicionadoEvent extends AbstractDomainEvent<ComentarioAdicionadoEvent.Payload> {
@@ -13,6 +14,7 @@ public class ComentarioAdicionadoEvent extends AbstractDomainEvent<ComentarioAdi
   }
 
   public static record Payload(
+    TarefaId tarefaAddedId,
     ComentarioId id,
     LocalDateTime dataCriacao,
     String titulo,

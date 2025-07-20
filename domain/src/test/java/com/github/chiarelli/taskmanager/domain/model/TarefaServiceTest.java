@@ -78,7 +78,6 @@ public class TarefaServiceTest {
       DataVencimentoVO.of(OffsetDateTime.now().plusDays(1)),
       eStatusTarefaVO.PENDENTE,
       ePrioridadeVO.BAIXA,
-      0L,
       new HashSet<>(),
       new HashSet<>()
     );
@@ -159,9 +158,15 @@ public class TarefaServiceTest {
           new AutorId(UUID.randomUUID().toString())
       );
 
-      tarefaService.adicionarComentarioComHistorico(tarefa, comentario);
+      projeto.adicionarTarefa(tarefa);
+      projeto.flushEvents(); // Limpa os eventos de domínio
 
-      verify(tarefa).adicionarComentario(eq(comentario), any());
+      when(tarefa.getId()).thenReturn(new TarefaId());
+      when(projetoRepository.findById(projeto.getId())).thenReturn(Optional.of(projeto));
+
+      tarefaService.adicionarComentarioComHistorico(projeto.getId(), tarefa.getId(), comentario);
+
+      verify(tarefa).adicionarComentario(eq(projeto), eq(comentario), any());
       verify(tarefaRepository).saveComentario(eq(tarefa.getId()), eq(comentario));
       verify(tarefaRepository).saveHistorico(eq(tarefa.getId()), any());
   }
@@ -176,9 +181,14 @@ public class TarefaServiceTest {
           new AutorId(UUID.randomUUID().toString())
       );
 
+      projeto.adicionarTarefa(tarefa);
+      projeto.flushEvents(); // Limpa os eventos de domínio
+
+      when(projetoRepository.findById(projeto.getId())).thenReturn(Optional.of(projeto));
+
       List<AbstractDomainEvent<?>> events 
           = tarefaService
-              .adicionarComentarioComHistorico(tarefa, comentario)
+              .adicionarComentarioComHistorico(projeto.getId(), tarefa.getId(), comentario)
               .events();
 
       assertThat(events).anyMatch(e -> e instanceof ComentarioAdicionadoEvent, "Deve ter emitido um evento do tipo ComentarioAdicionadoEvent");

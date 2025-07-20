@@ -46,7 +46,6 @@ public class TarefaTest {
       DataVencimentoVO.of(OffsetDateTime.now().plusDays(1)),
       eStatusTarefaVO.PENDENTE,
       ePrioridadeVO.BAIXA,
-      0L,
       new HashSet<>(),
       new HashSet<>()
     );
@@ -70,8 +69,6 @@ public class TarefaTest {
     assertThat(tarefa.getStatus()).isEqualTo(eStatusTarefaVO.EM_ANDAMENTO);
     assertThat(tarefa.getHistoricos()).contains(historico.getId());
     assertThat(tarefa.flushEvents()).anyMatch(e -> e instanceof StatusTarefaAlteradoEvent);
-    // Deve incrementar a versão
-    assertThat(tarefa.getVersion()).isEqualTo(1L);
   }
 
   @Test
@@ -82,8 +79,6 @@ public class TarefaTest {
     assertThatThrownBy(() -> tarefa.alterarStatus(projeto, eStatusTarefaVO.PENDENTE, historico))
         .isInstanceOf(DomainException.class)
         .hasMessageContaining("Status já se encontra");
-    // Versão deve manter 0
-    assertThat(tarefa.getVersion()).isEqualTo(0L);
   }
 
   @Test
@@ -95,8 +90,6 @@ public class TarefaTest {
     assertThat(tarefa.getDescricao()).isEqualTo(novaDescricao);
     assertThat(tarefa.getHistoricos()).contains(historico.getId());
     assertThat(tarefa.flushEvents()).anyMatch(e -> e instanceof TarefaAlteradaEvent);
-    // Deve incrementar a versão
-    assertThat(tarefa.getVersion()).isEqualTo(1L);
   }
 
   @Test
@@ -104,21 +97,17 @@ public class TarefaTest {
     tarefa.alterarDescricao(projeto, "Descrição", historico);
 
     assertThat(tarefa.flushEvents()).isEmpty();
-    // Versão deve manter 0
-    assertThat(tarefa.getVersion()).isEqualTo(0L);
   }
 
   @Test
   void deveAdicionarComentarioComSucessoEEmitirEvento() {
     var comentario = mock(Comentario.class);
 
-    tarefa.adicionarComentario(comentario, historico);
+    tarefa.adicionarComentario(projeto, comentario, historico);
 
     assertThat(tarefa.getComentarios()).contains(comentario.getId());
     assertThat(tarefa.getHistoricos()).contains(historico.getId());
     assertThat(tarefa.flushEvents()).anyMatch(e -> e instanceof ComentarioAdicionadoEvent);
-    // Deve incrementar a versão
-    assertThat(tarefa.getVersion()).isEqualTo(1L);
   }
 
   @Test
@@ -134,9 +123,6 @@ public class TarefaTest {
    void deveExcluirTarefaNaoPendente() {
      tarefa.alterarStatus(projeto, eStatusTarefaVO.CONCLUIDA, historico);
 
-     // Versao deve alterar
-     assertThat(tarefa.getVersion()).isEqualTo(1L);
-     
      tarefa.excluirTarefa(projeto);
      
      assertThat(tarefa.flushEvents()).anyMatch(e -> e instanceof TarefaExcluidaEvent);
@@ -150,8 +136,7 @@ public class TarefaTest {
       "Descrição",
       DataVencimentoVO.of(OffsetDateTime.now().plusDays(1)),
       eStatusTarefaVO.PENDENTE,
-      ePrioridadeVO.BAIXA,
-      0L
+      ePrioridadeVO.BAIXA
     );
 
     GenericValidator<Tarefa> validator = new GenericValidator<>(tarefa);
@@ -168,7 +153,6 @@ public class TarefaTest {
       "",
       null,
       null,
-      null,
       null
     );
 
@@ -176,8 +160,12 @@ public class TarefaTest {
 
     DomainException ex = assertThrows(DomainException.class, validator::assertValid);
 
+    System.out.println("#########################################33");
+    System.out.println(ex.getViolations());
+    System.out.println("#########################################33");
+
     assertNotNull(ex.getViolations());
-    assertEquals(5, ex.getViolations().size());
+    assertEquals(4, ex.getViolations().size());
 
     // // Opcional: checar mensagens ou paths específicos
     var paths = ex.getViolations().keySet() 
@@ -187,7 +175,6 @@ public class TarefaTest {
       assertTrue(paths.contains("prioridade"));
       assertTrue(paths.contains("dataVencimento"));
       assertTrue(paths.contains("titulo"));
-      assertTrue(paths.contains("version"));
       assertTrue(paths.contains("status"));
   }
 
@@ -199,18 +186,16 @@ public class TarefaTest {
       "Descrição",
       DataVencimentoVO.of(OffsetDateTime.now().minusDays(1)),
       eStatusTarefaVO.PENDENTE,
-      ePrioridadeVO.BAIXA,
-      -1L
+      ePrioridadeVO.BAIXA
     );
 
     GenericValidator<Tarefa> validator = new GenericValidator<>(tarefa);
 
     DomainException ex = assertThrows(DomainException.class, validator::assertValid);
 
-    assertEquals(3, ex.getViolations().size());
+    assertEquals(2, ex.getViolations().size());
 
     assertEquals("O titulo deve ter entre 3 e 100 caracteres", ex.getViolations().get("titulo"));
-    assertEquals("deve ser maior que ou igual à 0", ex.getViolations().get("version"));
     assertEquals("A data de vencimento deve ser maior que a data atual", ex.getViolations().get("dataVencimento.dataVencimento"));
   }
   

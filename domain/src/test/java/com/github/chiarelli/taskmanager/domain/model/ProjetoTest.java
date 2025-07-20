@@ -33,7 +33,7 @@ public class ProjetoTest {
       new ProjetoId(),
       "Projeto X", 
       "Descrição", 
-      0L, 
+      0L,
       new HashSet<>());
   }
 
@@ -46,7 +46,6 @@ public class ProjetoTest {
         DataVencimentoVO.of(OffsetDateTime.now().plusDays(1)),
         eStatusTarefaVO.PENDENTE,
         ePrioridadeVO.MEDIA,
-        0L,
         new HashSet<>(),
         new HashSet<>()
     );
@@ -70,7 +69,6 @@ public class ProjetoTest {
         DataVencimentoVO.of(OffsetDateTime.now().plusDays(1)),
         eStatusTarefaVO.PENDENTE,
         ePrioridadeVO.BAIXA,
-        0L,
         new HashSet<>(),
         new HashSet<>());
 
@@ -84,11 +82,11 @@ public class ProjetoTest {
   void naoDeveAdicionarMaisQue20Tarefas() {
     for (int i = 0; i < 20; i++) {
       projeto.adicionarTarefa(new Tarefa(new TarefaId(), "T" + i, "D", DataVencimentoVO.of(OffsetDateTime.now()),
-          eStatusTarefaVO.PENDENTE, ePrioridadeVO.MEDIA, 0L, new HashSet<>(), new HashSet<>()));
+          eStatusTarefaVO.PENDENTE, ePrioridadeVO.MEDIA, new HashSet<>(), new HashSet<>()));
     }
 
     Tarefa tarefaExtra = new Tarefa(new TarefaId(), "T21", "D", DataVencimentoVO.of(OffsetDateTime.now()),
-        eStatusTarefaVO.PENDENTE, ePrioridadeVO.MEDIA, 0L, new HashSet<>(), new HashSet<>());
+        eStatusTarefaVO.PENDENTE, ePrioridadeVO.MEDIA, new HashSet<>(), new HashSet<>());
 
     assertThatThrownBy(() -> projeto.adicionarTarefa(tarefaExtra))
         .isInstanceOf(DomainException.class)
@@ -102,7 +100,7 @@ public class ProjetoTest {
   @Test
   void naoDeveRemoverTarefaPendente() {
     Tarefa tarefa = new Tarefa(new TarefaId(), "T1", "D", DataVencimentoVO.of(OffsetDateTime.now()),
-        eStatusTarefaVO.PENDENTE, ePrioridadeVO.ALTA, 0L, new HashSet<>(), new HashSet<>());
+        eStatusTarefaVO.PENDENTE, ePrioridadeVO.ALTA, new HashSet<>(), new HashSet<>());
     projeto.adicionarTarefa(tarefa);
 
     assertThat(projeto.flushEvents())
@@ -117,11 +115,11 @@ public class ProjetoTest {
   @Test
   void devePermitirRemoverProjetoSemTarefasPendentes() {
     Tarefa tarefa1 = new Tarefa(new TarefaId(), "Tarefa", "D", DataVencimentoVO.of(OffsetDateTime.now()),
-        eStatusTarefaVO.CONCLUIDA, ePrioridadeVO.BAIXA, 0L, new HashSet<>(), new HashSet<>());
+        eStatusTarefaVO.CONCLUIDA, ePrioridadeVO.BAIXA, new HashSet<>(), new HashSet<>());
     projeto.adicionarTarefa(tarefa1);
 
     Tarefa tarefa2 = new Tarefa(new TarefaId(), "Tarefa", "D", DataVencimentoVO.of(OffsetDateTime.now()),
-        eStatusTarefaVO.EM_ANDAMENTO, ePrioridadeVO.ALTA, 0L, new HashSet<>(), new HashSet<>());
+        eStatusTarefaVO.EM_ANDAMENTO, ePrioridadeVO.ALTA, new HashSet<>(), new HashSet<>());
     projeto.adicionarTarefa(tarefa2);
 
     assertThatCode(projeto::excluirProjeto).doesNotThrowAnyException();

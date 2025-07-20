@@ -44,4 +44,19 @@ public class ProjetoDTO {
       target.setVersion(projeto.getVersion());
     return target;
   }
+
+  public static ProjetoDTO fromWithTarefas(Projeto projeto) {
+    var tarefas = projeto.getTarefas()
+        .stream()
+        .map(TarefaDTO::fromIgnoringCollections)
+        .toList();
+
+    var target = new ProjetoDTO();
+        target.setId(projeto.getId());
+        target.setTitulo(projeto.getTitulo());
+        target.setDescricao(projeto.getDescricao());
+        target.setVersion(projeto.getVersion());
+        target.setTarefas(tarefas);
+    return target;
+  }
 }

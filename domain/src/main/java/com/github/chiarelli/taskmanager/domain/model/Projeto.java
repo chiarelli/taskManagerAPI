@@ -65,16 +65,16 @@ public class Projeto extends BaseModel implements iDefaultAggregate {
   }
 
   public void alterarDadosDoProjeto(AlterarProjeto data) {
-    this.titulo = data.titulo();
-    this.descricao = data.descricao();
-    
     if(this.titulo.equals(data.titulo()) && this.descricao.equals(data.descricao())) {
       return; // Não houve alteração  
     }
-    this.version++;
+    this.titulo = data.titulo();
+    this.descricao = data.descricao();
 
+    this.version++;
+    
     var payload = new ProjetoAlteradoEvent.Payload(this.titulo, this.descricao);
-    this.addEvent(new ProjetoAlteradoEvent(this, payload));
+    this.addEvent(new ProjetoAlteradoEvent(this, payload));    
   }
   
   public void excluirProjeto() {

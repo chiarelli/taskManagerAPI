@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.github.chiarelli.taskmanager.application.shared.Event;
+import com.github.chiarelli.taskmanager.domain.entity.ProjetoId;
+import com.github.chiarelli.taskmanager.domain.entity.TarefaId;
 import com.github.chiarelli.taskmanager.domain.event.*;
 import com.github.chiarelli.taskmanager.domain.model.Projeto;
 import com.github.chiarelli.taskmanager.domain.model.ProjetoCriadoEvent;
@@ -41,6 +43,18 @@ public class DomainEventAdapters {
   public static class ProjetoAlteradoEventAdapter extends ProjetoAlteradoEvent implements Event {
     public ProjetoAlteradoEventAdapter(iDefaultAggregate projeto, Payload payload) {
       super((Projeto) projeto, payload);
+    }
+  }
+
+  public static class ProjetoExcluidoEventAdapter extends ProjetoExcluidoEvent implements Event {
+    public ProjetoExcluidoEventAdapter(iDefaultAggregate projeto, ProjetoId projetoId) {
+      super((Projeto) projeto, projetoId);
+    }
+  }
+  
+  public static class TarefaExcluidaEventAdapter extends TarefaExcluidaEvent implements Event {
+    public TarefaExcluidaEventAdapter(iDefaultAggregate projeto, TarefaId tarefaId) {
+      super((Projeto) projeto, tarefaId);
     }
   }
 

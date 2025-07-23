@@ -8,6 +8,7 @@ import java.util.Objects;
 
 import com.github.chiarelli.taskmanager.domain.model.BaseModel;
 import com.github.chiarelli.taskmanager.domain.shared.iDomainEventBuffer;
+import com.github.chiarelli.taskmanager.domain.shared.iEventFlusher;
 
 /**
  * Implementação padrão do buffer de eventos de domínio.
@@ -43,12 +44,12 @@ public class DomainEventBufferImpl implements iDomainEventBuffer {
    * @throws NullPointerException se o array de agregados for {@code null}
    */
   @Override
-  public void collectFrom(BaseModel... aggregates) {
+  public void collectFrom(iEventFlusher... aggregates) {
     Objects.requireNonNull(aggregates);
 
     Arrays.stream(aggregates)
       .filter(Objects::nonNull)
-      .map(BaseModel::flushEvents)
+      .map(iEventFlusher::flushEvents)
       .flatMap(Collection::stream)
       .forEach(events::add);
   }

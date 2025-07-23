@@ -105,7 +105,7 @@ public class TarefaServiceTest {
       tarefa.getTitulo(), tarefa.getDescricao(), tarefa.getDataVencimento(), 
       novoStatus, tarefa.getPrioridade());
 
-    List<AbstractDomainEvent<?>> events = tarefaService.alterarStatusComHistorico(data, autorId).events();
+    List<AbstractDomainEvent<?>> events = tarefaService.alterarStatusComHistorico(data, autorId).flushEvents();
 
     // Assert
     assertTrue(events.size() == 2, "Deve ter emitido 2 eventos");
@@ -135,7 +135,7 @@ public class TarefaServiceTest {
       tarefa.getTitulo(), novaDescricao, tarefa.getDataVencimento(), 
       tarefa.getStatus(), tarefa.getPrioridade());
 
-    List<AbstractDomainEvent<?>> events = tarefaService.alterarDescricaoComHistorico(data, autor).events();
+    List<AbstractDomainEvent<?>> events = tarefaService.alterarDescricaoComHistorico(data, autor).flushEvents();
 
     // Assert
     assertTrue(events.size() == 2, "Deve ter emitido 2 evento");
@@ -163,7 +163,7 @@ public class TarefaServiceTest {
           new AutorId(UUID.randomUUID().toString())
       );
 
-      List<AbstractDomainEvent<?>> events = tarefaService.adicionarComentarioComHistorico(projeto.getId(), tarefa.getId(), data).events();
+      List<AbstractDomainEvent<?>> events = tarefaService.adicionarComentarioComHistorico(projeto.getId(), tarefa.getId(), data).flushEvents();
 
       assertTrue(events.size() == 3, "Deve ter emitido 3 eventos");
       assertThat(events).anyMatch(e -> e instanceof ComentarioCriadoEvent, "Deve ter emitido um evento do tipo ComentarioCriadoEvent");
@@ -191,7 +191,7 @@ public class TarefaServiceTest {
       List<AbstractDomainEvent<?>> events 
           = tarefaService
               .adicionarComentarioComHistorico(projeto.getId(), tarefa.getId(), data)
-              .events();
+              .flushEvents();
 
       assertTrue(events.size() == 3, "Deve ter emitido 3 eventos");
       assertThat(events).anyMatch(e -> e instanceof ComentarioCriadoEvent, "Deve ter emitido um evento do tipo ComentarioCriadoEvent");
@@ -227,7 +227,7 @@ public class TarefaServiceTest {
       List<AbstractDomainEvent<?>> events 
           = tarefaService
               .alterarComentarioComHistorico(projeto.getId(), tarefa.getId(), data)
-              .events();
+              .flushEvents();
               
       assertTrue(events.size() == 2, "Deve ter emitido 2 eventos");
       assertThat(events).anyMatch(e -> e instanceof ComentarioAlteradoEvent, "Deve ter emitido um evento do tipo ComentarioAlteradoEvent");
@@ -255,7 +255,7 @@ public class TarefaServiceTest {
     var data = new ExcluirTarefa(projeto.getId(), tarefa.getId());
 
     List<AbstractDomainEvent<?>> events 
-        = tarefaService.excluirTarefaComHistorico(data, autor).events();
+        = tarefaService.excluirTarefaComHistorico(data, autor).flushEvents();
 
     // Assert
     assertThat(events).anyMatch(e -> e instanceof TarefaExcluidaEvent, "Deve ter emitido um evento do tipo TarefaExcluidaEvent");
@@ -284,7 +284,7 @@ public class TarefaServiceTest {
     // Assert - a exclusão deve lançar a exceção
     assertThatThrownBy(() -> {
         var data = new ExcluirTarefa(projeto.getId(), tarefa.getId());
-        var Devents = tarefaService.excluirTarefaComHistorico(data, autorId).events();
+        var Devents = tarefaService.excluirTarefaComHistorico(data, autorId).flushEvents();
         Devents.forEach(events::add);
     })
     .isInstanceOf(DomainException.class)

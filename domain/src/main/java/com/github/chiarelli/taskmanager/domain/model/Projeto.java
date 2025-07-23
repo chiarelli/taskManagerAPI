@@ -1,5 +1,6 @@
 package com.github.chiarelli.taskmanager.domain.model;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -83,12 +84,20 @@ public class Projeto extends BaseModel implements iDefaultAggregate {
         .anyMatch(t -> t.getStatus() == eStatusTarefaVO.PENDENTE);
 
     if (existeTarefaPendente) {
-      throw new DomainException("Não é possível remover o projeto: há tarefas pendentes.");
+      throw new DomainException("Não é possível remover o projeto: há pelo menos uma tarefa pendente.");
     }
 
+    Set.copyOf(tarefas).stream()
+      .map(t -> {
+        t.excluirTarefa(this); // Exclui todas as tarefas antes de excluir o projeto
+        this.tarefas.remove(t);
+        
+        return t.flushEvents();
+      })
+      .flatMap(Collection::stream)
+      .forEach(this::addEvent); // Adiciona os eventos das tarefas ao projeto
+    
     this.version++;
-
-    Set.copyOf(tarefas).forEach(t -> this.removerTarefa(t.getId())); // Exclui todas as tarefas antes de excluir o projeto
 
     this.addEvent(new ProjetoExcluidoEvent(this, this.id));
   }
@@ -105,8 +114,10 @@ public class Projeto extends BaseModel implements iDefaultAggregate {
   }
 
   public void removerTarefa(TarefaId tarefaId) {
-    getTarefaOrThrow(tarefaId)    
-        .excluirTarefa(this);
+    Tarefa tarefa = getTarefaOrThrow(tarefaId);
+    tarefa.excluirTarefa(this);
+    
+    tarefa.flushEvents().forEach(this::addEvent);
 
     this.version++;
     this.tarefas.removeIf(t -> t.getId().equals(tarefaId));

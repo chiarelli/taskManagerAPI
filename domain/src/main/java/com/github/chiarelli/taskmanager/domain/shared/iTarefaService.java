@@ -8,14 +8,15 @@ import com.github.chiarelli.taskmanager.domain.dto.ServiceResult;
 import com.github.chiarelli.taskmanager.domain.entity.AutorId;
 import com.github.chiarelli.taskmanager.domain.entity.ProjetoId;
 import com.github.chiarelli.taskmanager.domain.entity.TarefaId;
+import com.github.chiarelli.taskmanager.domain.model.Comentario;
 
-public interface ITarefaService {
+public interface iTarefaService {
 
   ServiceResult<Void> alterarStatusComHistorico(AlterarTarefa data, AutorId autor);
 
   ServiceResult<Void> alterarDescricaoComHistorico(AlterarTarefa data, AutorId autor);
 
-  ServiceResult<Void> adicionarComentarioComHistorico(ProjetoId projetoId, TarefaId tarefaId, CriarComentario comentario);
+  ServiceResult<Comentario> adicionarComentarioComHistorico(ProjetoId projetoId, TarefaId tarefaId, CriarComentario comentario);
 
   ServiceResult<Void> alterarComentarioComHistorico(ProjetoId projetoId, TarefaId tarefaId, AlterarComentario data);
 

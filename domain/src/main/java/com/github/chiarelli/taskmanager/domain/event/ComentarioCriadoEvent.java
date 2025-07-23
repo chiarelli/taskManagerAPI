@@ -5,11 +5,11 @@ import java.util.Date;
 import com.github.chiarelli.taskmanager.domain.entity.AutorId;
 import com.github.chiarelli.taskmanager.domain.entity.ComentarioId;
 import com.github.chiarelli.taskmanager.domain.entity.TarefaId;
-import com.github.chiarelli.taskmanager.domain.model.iDefaultAggregate;
+import com.github.chiarelli.taskmanager.domain.model.Comentario;
 
-public class ComentarioAdicionadoEvent extends AbstractDomainEvent<ComentarioAdicionadoEvent.Payload> {
+public class ComentarioCriadoEvent extends AbstractDomainEvent<ComentarioCriadoEvent.Payload> {
 
-  public ComentarioAdicionadoEvent(iDefaultAggregate aggregate, Payload payload) {
+  public ComentarioCriadoEvent(Comentario aggregate, Payload payload) {
     super(aggregate, payload);
   }
 
@@ -21,5 +21,4 @@ public class ComentarioAdicionadoEvent extends AbstractDomainEvent<ComentarioAdi
     String descricao,
     AutorId autor
   ) { }
-
 }

@@ -2,14 +2,18 @@ package com.github.chiarelli.taskmanager.domain.model;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
+import com.github.chiarelli.taskmanager.domain.dto.AlterarComentario;
 import com.github.chiarelli.taskmanager.domain.dto.AlterarTarefa;
+import com.github.chiarelli.taskmanager.domain.dto.CriarComentario;
 import com.github.chiarelli.taskmanager.domain.dto.ExcluirTarefa;
 import com.github.chiarelli.taskmanager.domain.dto.ServiceResult;
 import com.github.chiarelli.taskmanager.domain.entity.AutorId;
 import com.github.chiarelli.taskmanager.domain.entity.HistoricoId;
 import com.github.chiarelli.taskmanager.domain.entity.ProjetoId;
 import com.github.chiarelli.taskmanager.domain.entity.TarefaId;
+import com.github.chiarelli.taskmanager.domain.event.AbstractDomainEvent;
 import com.github.chiarelli.taskmanager.domain.event.HistoricoAdicionadoEvent;
 import com.github.chiarelli.taskmanager.domain.exception.DomainException;
 import com.github.chiarelli.taskmanager.domain.repository.iProjetoRepository;
@@ -80,11 +84,13 @@ public class TarefaService implements ITarefaService {
   }
   
   @Override
-  public ServiceResult<Void> adicionarComentarioComHistorico(ProjetoId projetoId, TarefaId tarefaId, Comentario comentario) {
+  public ServiceResult<Void> adicionarComentarioComHistorico(ProjetoId projetoId, TarefaId tarefaId, CriarComentario data) {
     var resp = loadTarefaByProjetoIdAndTarefaId(projetoId, tarefaId);
 
     Tarefa tarefa = resp.tarefa();
     Projeto projeto = resp.projeto();
+
+    Comentario comentario = Comentario.criarNovoComentario(data.titulo(), data.descricao(), data.autor(), tarefa.getId());
 
     var historico = new Historico(
       new HistoricoId(),
@@ -100,18 +106,48 @@ public class TarefaService implements ITarefaService {
     tarefaRepository.saveHistorico(tarefa.getId(), historico);
 
     eventBuffer.collectFrom(tarefa);
+    eventBuffer.collectFrom(comentario);
 
-    var payload = new HistoricoAdicionadoEvent.Payload(tarefaId, historico.getId(),
-        historico.getDataOcorrencia(), historico.getTitulo(), 
-        historico.getDescricao(), historico.getAutor());
+    return new ServiceResult<>(null, eventBuffer.flushEvents());
+  }
+  
+  @Override
+  public ServiceResult<Void> alterarComentarioComHistorico(ProjetoId projetoId, TarefaId tarefaId, AlterarComentario data) {
+    var resp = loadTarefaByProjetoIdAndTarefaId(projetoId, tarefaId);
+
+    Tarefa tarefa = resp.tarefa();
+
+    Comentario comentario = tarefaRepository.findComentarioByComentarioIdAndTarefaId(tarefa.getId(), data.id())
+        .orElseThrow(() -> new DomainException("Comentario %s nao pertence à tarefa %s"));
+
+    var historico = new Historico(
+      new HistoricoId(),
+      new Date(),
+      "Alteração de Comentario",
+      "Alterado o comentario: " + comentario.getDescricao(),
+      comentario.getAutor()
+    );
+
+    comentario.atualizarComentario(data);
+
+    tarefaRepository.saveComentario(tarefa.getId(), comentario);
+    tarefaRepository.saveHistorico(tarefaId, historico);
+
+    eventBuffer.collectFrom(tarefa);
+    eventBuffer.collectFrom(comentario);
+
+    var payload = new HistoricoAdicionadoEvent.Payload(tarefa.getId(), historico.getId(),
+    historico.getDataOcorrencia(), historico.getTitulo(), 
+    historico.getDescricao(), historico.getAutor());
     
-    var events = new ArrayList<>(eventBuffer.flushEvents());
+    var event = new HistoricoAdicionadoEvent(resp.projeto(), payload);
 
-    events.add(new HistoricoAdicionadoEvent(projeto, payload)); // Adiciona o evento de histórico
+    List<AbstractDomainEvent<?>> events = new ArrayList<>(eventBuffer.flushEvents());
+                                 events.add(event);
 
     return new ServiceResult<>(null, events);
   }
-  
+
   @Override
   public ServiceResult<Void> excluirTarefaComHistorico(ExcluirTarefa data, AutorId autor) {
     var resp = loadTarefaByProjetoIdAndTarefaId(data.projetoId(), data.tarefaId());

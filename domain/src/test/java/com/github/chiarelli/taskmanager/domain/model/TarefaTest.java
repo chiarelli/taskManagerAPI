@@ -160,14 +160,10 @@ public class TarefaTest {
 
     DomainException ex = assertThrows(DomainException.class, validator::assertValid);
 
-    System.out.println("#########################################33");
-    System.out.println(ex.getViolations());
-    System.out.println("#########################################33");
-
     assertNotNull(ex.getViolations());
     assertEquals(4, ex.getViolations().size());
 
-    // // Opcional: checar mensagens ou paths específicos
+    // Opcional: checar mensagens ou paths específicos
     var paths = ex.getViolations().keySet() 
       .stream()
       .toList();

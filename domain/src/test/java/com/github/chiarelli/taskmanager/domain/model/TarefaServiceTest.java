@@ -10,7 +10,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -25,14 +24,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.github.chiarelli.taskmanager.domain.dto.AlterarComentario;
 import com.github.chiarelli.taskmanager.domain.dto.AlterarTarefa;
+import com.github.chiarelli.taskmanager.domain.dto.CriarComentario;
 import com.github.chiarelli.taskmanager.domain.dto.ExcluirTarefa;
 import com.github.chiarelli.taskmanager.domain.entity.AutorId;
-import com.github.chiarelli.taskmanager.domain.entity.ComentarioId;
 import com.github.chiarelli.taskmanager.domain.entity.ProjetoId;
 import com.github.chiarelli.taskmanager.domain.entity.TarefaId;
 import com.github.chiarelli.taskmanager.domain.event.AbstractDomainEvent;
 import com.github.chiarelli.taskmanager.domain.event.ComentarioAdicionadoEvent;
+import com.github.chiarelli.taskmanager.domain.event.ComentarioAlteradoEvent;
+import com.github.chiarelli.taskmanager.domain.event.ComentarioCriadoEvent;
 import com.github.chiarelli.taskmanager.domain.event.DomainEventBufferImpl;
 import com.github.chiarelli.taskmanager.domain.event.HistoricoAdicionadoEvent;
 import com.github.chiarelli.taskmanager.domain.event.StatusTarefaAlteradoEvent;
@@ -149,50 +151,90 @@ public class TarefaServiceTest {
 
   @Test
   void deveAdicionarComentarioEChamarRepositorios() {
-      var tarefa = mock(Tarefa.class);
-      var comentario = new Comentario(
-          new ComentarioId(),
-          LocalDateTime.now(),
+      projeto.adicionarTarefa(tarefa);
+      projeto.flushEvents(); // Limpa os eventos de domínio
+
+      when(projetoRepository.findById(projeto.getId())).thenReturn(Optional.of(projeto));
+
+      var data = new CriarComentario(
+          tarefa.getId(),
           "comentário teste",
           "Descrição teste",
           new AutorId(UUID.randomUUID().toString())
       );
 
-      projeto.adicionarTarefa(tarefa);
-      projeto.flushEvents(); // Limpa os eventos de domínio
+      List<AbstractDomainEvent<?>> events = tarefaService.adicionarComentarioComHistorico(projeto.getId(), tarefa.getId(), data).events();
 
-      when(tarefa.getId()).thenReturn(new TarefaId());
-      when(projetoRepository.findById(projeto.getId())).thenReturn(Optional.of(projeto));
+      assertTrue(events.size() == 3, "Deve ter emitido 3 eventos");
+      assertThat(events).anyMatch(e -> e instanceof ComentarioCriadoEvent, "Deve ter emitido um evento do tipo ComentarioCriadoEvent");
+      assertThat(events).anyMatch(e -> e instanceof ComentarioAdicionadoEvent, "Deve ter emitido um evento do tipo ComentarioAdicionadoEvent");
+      assertThat(events).anyMatch(e -> e instanceof HistoricoAdicionadoEvent, "Deve ter emitido um evento do tipo HistoricoAdicionadoEvent");
 
-      tarefaService.adicionarComentarioComHistorico(projeto.getId(), tarefa.getId(), comentario);
-
-      verify(tarefa).adicionarComentario(eq(projeto), eq(comentario), any());
-      verify(tarefaRepository).saveComentario(eq(tarefa.getId()), eq(comentario));
+      verify(tarefaRepository).saveComentario(eq(tarefa.getId()), any());
       verify(tarefaRepository).saveHistorico(eq(tarefa.getId()), any());
   }
 
   @Test
-  void deveEmitirEventosAoAdicionarComentario() {
-    var comentario = new Comentario(
-          new ComentarioId(),
-          LocalDateTime.now(),
-          "comentário teste",
-          "Descrição teste",
-          new AutorId(UUID.randomUUID().toString())
-      );
-
+  void deveEmitirEventosAoAdicionarComentarioEChamarRepositorios() {
       projeto.adicionarTarefa(tarefa);
       projeto.flushEvents(); // Limpa os eventos de domínio
 
       when(projetoRepository.findById(projeto.getId())).thenReturn(Optional.of(projeto));
 
+      var data = new CriarComentario(
+          tarefa.getId(),
+          "comentário teste",
+          "Descrição teste",
+          new AutorId(UUID.randomUUID().toString())
+      );
+
       List<AbstractDomainEvent<?>> events 
           = tarefaService
-              .adicionarComentarioComHistorico(projeto.getId(), tarefa.getId(), comentario)
+              .adicionarComentarioComHistorico(projeto.getId(), tarefa.getId(), data)
               .events();
 
+      assertTrue(events.size() == 3, "Deve ter emitido 3 eventos");
+      assertThat(events).anyMatch(e -> e instanceof ComentarioCriadoEvent, "Deve ter emitido um evento do tipo ComentarioCriadoEvent");
       assertThat(events).anyMatch(e -> e instanceof ComentarioAdicionadoEvent, "Deve ter emitido um evento do tipo ComentarioAdicionadoEvent");
       assertThat(events).anyMatch(e -> e instanceof HistoricoAdicionadoEvent, "Deve ter emitido um evento do tipo HistoricoAdicionadoEvent");
+
+      verify(tarefaRepository).saveComentario(eq(tarefa.getId()), any());
+      verify(tarefaRepository).saveHistorico(eq(tarefa.getId()), any());
+  }
+
+  @Test
+  void deveEmitirEventosAoAlterarComentarioEChamarRepositorios() {
+      projeto.adicionarTarefa(tarefa);
+      projeto.flushEvents(); // Limpa os eventos de domínio
+
+      Comentario comentario = Comentario.criarNovoComentario(
+          "comentário",
+          "Descrição",
+          new AutorId(UUID.randomUUID().toString()),
+          tarefa.getId()
+      );
+      comentario.flushEvents(); // Limpa os eventos de domínio
+
+      when(projetoRepository.findById(projeto.getId())).thenReturn(Optional.of(projeto));
+      when(tarefaRepository.findComentarioByComentarioIdAndTarefaId(tarefa.getId(), comentario.getId())).thenReturn(Optional.of(comentario));
+
+      var data = new AlterarComentario(
+          comentario.getId(),
+          "comentário alterado",
+          "Descrição alterada"
+      );
+
+      List<AbstractDomainEvent<?>> events 
+          = tarefaService
+              .alterarComentarioComHistorico(projeto.getId(), tarefa.getId(), data)
+              .events();
+              
+      assertTrue(events.size() == 2, "Deve ter emitido 2 eventos");
+      assertThat(events).anyMatch(e -> e instanceof ComentarioAlteradoEvent, "Deve ter emitido um evento do tipo ComentarioAlteradoEvent");
+      assertThat(events).anyMatch(e -> e instanceof HistoricoAdicionadoEvent, "Deve ter emitido um evento do tipo HistoricoAdicionadoEvent");
+
+      verify(tarefaRepository).saveComentario(eq(tarefa.getId()), any());
+      verify(tarefaRepository).saveHistorico(eq(tarefa.getId()), any());
   }
 
   @Test

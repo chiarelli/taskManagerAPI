@@ -18,13 +18,13 @@ import com.github.chiarelli.taskmanager.domain.event.HistoricoAdicionadoEvent;
 import com.github.chiarelli.taskmanager.domain.exception.DomainException;
 import com.github.chiarelli.taskmanager.domain.repository.iProjetoRepository;
 import com.github.chiarelli.taskmanager.domain.repository.iTarefasRepository;
-import com.github.chiarelli.taskmanager.domain.shared.ITarefaService;
+import com.github.chiarelli.taskmanager.domain.shared.iTarefaService;
 import com.github.chiarelli.taskmanager.domain.shared.iDomainEventBuffer;
 
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class TarefaService implements ITarefaService {
+public class TarefaService implements iTarefaService {
 
   private final iTarefasRepository tarefaRepository;
   private final iProjetoRepository projetoRepository;
@@ -84,7 +84,7 @@ public class TarefaService implements ITarefaService {
   }
   
   @Override
-  public ServiceResult<Void> adicionarComentarioComHistorico(ProjetoId projetoId, TarefaId tarefaId, CriarComentario data) {
+  public ServiceResult<Comentario> adicionarComentarioComHistorico(ProjetoId projetoId, TarefaId tarefaId, CriarComentario data) {
     var resp = loadTarefaByProjetoIdAndTarefaId(projetoId, tarefaId);
 
     Tarefa tarefa = resp.tarefa();
@@ -108,7 +108,7 @@ public class TarefaService implements ITarefaService {
     eventBuffer.collectFrom(tarefa);
     eventBuffer.collectFrom(comentario);
 
-    return new ServiceResult<>(null, eventBuffer.flushEvents());
+    return new ServiceResult<>(comentario, eventBuffer.flushEvents());
   }
   
   @Override

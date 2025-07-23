@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.OffsetDateTime;
 import java.util.HashSet;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,7 +53,7 @@ public class ProjetoTest {
 
     assertThatThrownBy(projeto::excluirProjeto)
         .isInstanceOf(DomainException.class)
-        .hasMessageContaining("tarefas pendentes");
+        .hasMessageContaining("há pelo menos uma tarefa pendente");
 
     assertThat(projeto.flushEvents()).noneMatch(e -> e instanceof TarefaExcluidaEvent);
     assertThat(projeto.flushEvents()).noneMatch(e -> e instanceof ProjetoExcluidoEvent);
@@ -109,11 +108,30 @@ public class ProjetoTest {
 
     assertThatThrownBy(() -> projeto.removerTarefa(tarefa.getId()))
       .isInstanceOf(DomainException.class);
-    
+
+    assertThat(projeto.flushEvents()).isEmpty(); // não deve emitir nenhum evento   
+  }
+
+  @Test
+  void deveRemoverTarefa() {
+    Tarefa tarefa = new Tarefa(new TarefaId(), "T1", "D", DataVencimentoVO.of(OffsetDateTime.now()),
+        eStatusTarefaVO.CONCLUIDA, ePrioridadeVO.ALTA, new HashSet<>(), new HashSet<>());
+    projeto.adicionarTarefa(tarefa);
+
+    assertThat(projeto.flushEvents())
+      .anyMatch(e -> e instanceof TarefaAdicionadaEvent)
+      .hasSize(1);
+
+    projeto.removerTarefa(tarefa.getId());
+
+    assertThat(projeto.flushEvents())
+      .anyMatch(e -> e instanceof TarefaExcluidaEvent)
+      .hasSize(1);
   }
 
   @Test
   void devePermitirRemoverProjetoSemTarefasPendentes() {
+    // Arrange
     Tarefa tarefa1 = new Tarefa(new TarefaId(), "Tarefa", "D", DataVencimentoVO.of(OffsetDateTime.now()),
         eStatusTarefaVO.CONCLUIDA, ePrioridadeVO.BAIXA, new HashSet<>(), new HashSet<>());
     projeto.adicionarTarefa(tarefa1);
@@ -122,9 +140,12 @@ public class ProjetoTest {
         eStatusTarefaVO.EM_ANDAMENTO, ePrioridadeVO.ALTA, new HashSet<>(), new HashSet<>());
     projeto.adicionarTarefa(tarefa2);
 
+    // Action
     assertThatCode(projeto::excluirProjeto).doesNotThrowAnyException();
 
+    // Asserts
     var projectEvents = projeto.flushEvents();
+
     assertThat(projectEvents)
       .filteredOn(e -> e instanceof TarefaAdicionadaEvent)
       .anyMatch(e -> e instanceof TarefaAdicionadaEvent)
@@ -135,7 +156,7 @@ public class ProjetoTest {
       .anyMatch(e -> e instanceof ProjetoExcluidoEvent)
       .hasSize(1);
 
-    assertThat( Stream.concat(tarefa1.flushEvents().stream(), tarefa2.flushEvents().stream()) )
+    assertThat( projectEvents )
       .filteredOn(e -> e instanceof TarefaExcluidaEvent)
       .anyMatch(e -> e instanceof TarefaExcluidaEvent)
       .hasSize(2);
@@ -154,5 +175,25 @@ public class ProjetoTest {
     assertThat(projeto.flushEvents()).isEmpty();
   }
 
+  @Test
+  void deveExcluirTodasTarefasAoExcluirProjeto() {
+    // Arrange
+    // Cria 20 tarefas
+    for (int i = 0; i < 20; i++) {
+      projeto.adicionarTarefa(new Tarefa(new TarefaId(), "T" + i, "D", DataVencimentoVO.of(OffsetDateTime.now()),
+          eStatusTarefaVO.CONCLUIDA, ePrioridadeVO.MEDIA, new HashSet<>(), new HashSet<>()));
+    }
+    projeto.flushEvents();
+    
+    // Action
+    projeto.excluirProjeto();
+    var events = projeto.flushEvents();
+
+    // Asserts
+    assertThat(events).anyMatch(e -> e instanceof ProjetoExcluidoEvent);
+    assertThat(events).anyMatch(e -> e instanceof TarefaExcluidaEvent);
+    assertThat(events).filteredOn(e -> e instanceof TarefaExcluidaEvent).hasSize(20);
+    assertThat(projeto.getTarefas()).isEmpty();
+  }
 
 }

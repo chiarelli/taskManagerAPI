@@ -1,6 +1,6 @@
-package com.github.chiarelli.taskmanager.domain.model;
+package com.github.chiarelli.taskmanager.domain.event;
 
-import com.github.chiarelli.taskmanager.domain.event.AbstractDomainEvent;
+import com.github.chiarelli.taskmanager.domain.model.Projeto;
 
 public class ProjetoCriadoEvent extends AbstractDomainEvent<ProjetoCriadoEvent.Payload> {
 

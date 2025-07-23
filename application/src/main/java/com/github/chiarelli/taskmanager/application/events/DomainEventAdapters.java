@@ -9,7 +9,6 @@ import com.github.chiarelli.taskmanager.domain.entity.ProjetoId;
 import com.github.chiarelli.taskmanager.domain.entity.TarefaId;
 import com.github.chiarelli.taskmanager.domain.event.*;
 import com.github.chiarelli.taskmanager.domain.model.Projeto;
-import com.github.chiarelli.taskmanager.domain.model.ProjetoCriadoEvent;
 import com.github.chiarelli.taskmanager.domain.model.iDefaultAggregate;
 
 public class DomainEventAdapters {

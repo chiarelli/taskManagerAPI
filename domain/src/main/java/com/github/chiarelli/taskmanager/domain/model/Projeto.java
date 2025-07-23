@@ -11,6 +11,7 @@ import com.github.chiarelli.taskmanager.domain.entity.ProjetoId;
 import com.github.chiarelli.taskmanager.domain.entity.TarefaId;
 import com.github.chiarelli.taskmanager.domain.event.NovaTarefaCriadaEvent;
 import com.github.chiarelli.taskmanager.domain.event.ProjetoAlteradoEvent;
+import com.github.chiarelli.taskmanager.domain.event.ProjetoCriadoEvent;
 import com.github.chiarelli.taskmanager.domain.event.ProjetoExcluidoEvent;
 import com.github.chiarelli.taskmanager.domain.event.TarefaAdicionadaEvent;
 import com.github.chiarelli.taskmanager.domain.exception.DomainException;

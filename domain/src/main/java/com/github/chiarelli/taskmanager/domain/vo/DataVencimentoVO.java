@@ -18,6 +18,10 @@ public class DataVencimentoVO {
   @NotNull(message = "A data de vencimento deve ser informada")
   private final Date dataVencimento;
 
+  public static DataVencimentoVO now() {
+    return new DataVencimentoVO(new Date());
+  }
+
   public static DataVencimentoVO of(OffsetDateTime dataVencimento) {
     Date date = Date.from(dataVencimento.toInstant());
     return new DataVencimentoVO(date);

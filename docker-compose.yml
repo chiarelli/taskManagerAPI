@@ -1,0 +1,14 @@
+services:
+  mongodb:
+    image: mongo:7.0
+    ports:
+      - 27017:27017
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=taskmanager
+      - MONGO_INITDB_ROOT_PASSWORD=pR0sb0FboS4
+    # volumes:
+      # - mongodb_taskmanager_data:/data/db
+
+# volumes:
+  # mongodb_taskmanager_data:
+    # driver: local

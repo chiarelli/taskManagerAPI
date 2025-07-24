@@ -14,7 +14,8 @@ public class ProjetoRepositoryMock implements iProjetoRepository {
   @Override
   public Optional<Projeto> findById(ProjetoId id) {
     // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'findById'");
+    // throw new UnsupportedOperationException("Unimplemented method 'findById'");
+    return Optional.empty();
   }
 
   @Override

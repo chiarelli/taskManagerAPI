@@ -2,9 +2,10 @@ package com.github.chiarelli.taskmanager.spring_boot_run;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
 @SpringBootApplication(scanBasePackages = "com.github.chiarelli.taskmanager")
-// @EnableMongoRepositories(basePackages = "com.github.chiarelli.taskmanager.infra.springdata.mongodb.repository")
+@EnableMongoRepositories(basePackages = "com.github.chiarelli.taskmanager.infra.springdata.mongodb.repository")
 public class TaskManagerSpringBootRunApplication {
 
 	public static void main(String[] args) {

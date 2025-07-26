@@ -42,11 +42,13 @@ public class ProjetoRepositoryMock implements iProjetoRepository {
     // throw new UnsupportedOperationException("Unimplemented method 'deleteTarefa'");
   }
 
+  /*
   @Override
   public List<Projeto> findAllByUserId(String userId) {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'findAllByUserId'");
   }
+  */
 
   @Override
   public List<Tarefa> findAllTarefasByProjetoId(ProjetoId idProjeto) {

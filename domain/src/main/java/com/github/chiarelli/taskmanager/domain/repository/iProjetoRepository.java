@@ -20,7 +20,7 @@ public interface iProjetoRepository {
 
   void deleteTarefa(ProjetoId projetoId, TarefaId tarefaId);
 
-  List<Projeto> findAllByUserId(String userId);
+  // List<Projeto> findAllByUserId(String userId);
 
   List<Tarefa> findAllTarefasByProjetoId(ProjetoId idProjeto);
   

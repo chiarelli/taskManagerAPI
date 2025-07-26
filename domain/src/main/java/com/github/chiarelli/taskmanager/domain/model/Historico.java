@@ -5,10 +5,10 @@ import java.util.Date;
 import com.github.chiarelli.taskmanager.domain.entity.AutorId;
 import com.github.chiarelli.taskmanager.domain.entity.HistoricoId;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Getter
 public class Historico {
 

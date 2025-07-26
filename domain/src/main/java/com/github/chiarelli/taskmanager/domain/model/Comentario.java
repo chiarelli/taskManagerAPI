@@ -9,9 +9,11 @@ import com.github.chiarelli.taskmanager.domain.entity.TarefaId;
 import com.github.chiarelli.taskmanager.domain.event.ComentarioAlteradoEvent;
 import com.github.chiarelli.taskmanager.domain.event.ComentarioCriadoEvent;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor
 public class Comentario extends BaseModel implements iDefaultAggregate {
 
   private ComentarioId id;

@@ -24,14 +24,19 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@ToString
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 public class Tarefa extends BaseModel {
 
+  @EqualsAndHashCode.Include
   private TarefaId id;
 
   @Size(min = 8, max = 100, message = "O titulo deve ter entre 3 e 100 caracteres")

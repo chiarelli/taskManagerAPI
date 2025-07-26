@@ -19,15 +19,21 @@ import com.github.chiarelli.taskmanager.domain.exception.DomainException;
 import com.github.chiarelli.taskmanager.domain.vo.eStatusTarefaVO;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@ToString
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 public class Projeto extends BaseModel implements iDefaultAggregate {
 
+  @EqualsAndHashCode.Include
   private ProjetoId id;
+
   private String titulo;
   private String descricao;
 
@@ -104,8 +110,12 @@ public class Projeto extends BaseModel implements iDefaultAggregate {
 
   /****** Métodos de negócio de Tarefa ******/
 
-  void adicionarTarefa(Tarefa novaTarefa) {    
+  public void adicionarTarefa(Tarefa novaTarefa) {    
     canAddOneMoreTarefa(); // Verifica se pode adicionar mais uma tarefa
+
+    // if(this.tarefas.contains(novaTarefa)) {
+    //   return; // Tarefa ja cadastrada
+    // }
 
     this.tarefas.add(novaTarefa);
     this.version++;

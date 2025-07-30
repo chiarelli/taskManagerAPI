@@ -1,13 +1,21 @@
 package com.github.chiarelli.taskmanager.presentation.dtos;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import org.springframework.data.domain.Page;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 @JsonPropertyOrder({"page", "size", "length", "total_query_count", "total_pages", "content"})
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
 public class PageCollectionJsonResponse<T> {
 
   private long length;
@@ -25,70 +33,18 @@ public class PageCollectionJsonResponse<T> {
   @JsonProperty("content")
   private List<T> data;
 
-  // Construtor padrão
-  public PageCollectionJsonResponse() {}
-
-  // Construtor com parâmetros
-  public PageCollectionJsonResponse(
-    long length, 
-    long page,
-    long size,
-    long queryCount, 
-    long totalPages, 
-    List<T> data) {
-    this.length = length;
-    this.page = page;
-    this.size = size;
-    this.queryCount = queryCount;
-    this.totalPages = totalPages;
-    setData(data);
-  }
-
-  public long getLength() {
-    return length;
-  }
-
-  public void setLength(int length) {
-    this.length = length;
-  }
-
-  public long getQueryCount() {
-    return queryCount;
-  }
-
-  public void setQueryCount(int queryCount) {
-    this.queryCount = queryCount;
-  }
-
-  public long getTotalPages() {
-    return totalPages;
-  }
-
-  public void setPage(int page) {
-    this.totalPages = page;
-  }
-
-  public long getPage() {
-    return page;
-  }
-
-  public long getSize() {
-    return size;
-  }
-
-  public void setSize(int size) {
-    this.size = size;
-  }
-
-  public void setTotalPages(int totalPages) {
-    this.totalPages = totalPages;
+  // Construtor com Page<T>
+  public PageCollectionJsonResponse(Page<T> page) {
+    this.length = page.getTotalElements();
+    this.page = page.getNumber() + 1;
+    this.size = page.getSize();
+    this.queryCount = page.getTotalElements();
+    this.totalPages = page.getTotalPages();
+    setData(page.getContent());
   }
 
   public List<T> getData() {
-    if(data == null) {
-      data = new ArrayList<>();
-    }
-    return data;
+    return List.copyOf(data == null ? List.of() : data);
   }
 
   public void setData(List<T> data) {

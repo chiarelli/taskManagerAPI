@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.github.chiarelli.taskmanager.application.dtos.ProjetoDTO;
 import com.github.chiarelli.taskmanager.domain.entity.ProjetoId;
 import com.github.chiarelli.taskmanager.domain.model.Projeto;
 import com.github.chiarelli.taskmanager.domain.model.Tarefa;
@@ -42,6 +43,10 @@ public class ProjetoMapper {
         doc.getDescricao(),
         doc.getVersion(),
         tarefas);
+  }
+
+  public static ProjetoDTO toDTO(ProjetoDocument doc) {
+    return ProjetoDTO.from(toDomain(doc));
   }
 
 }

@@ -10,13 +10,19 @@ import com.github.chiarelli.taskmanager.domain.event.ComentarioAlteradoEvent;
 import com.github.chiarelli.taskmanager.domain.event.ComentarioCriadoEvent;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.ToString;
 
 @Getter
 @AllArgsConstructor
+@ToString
+@EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
 public class Comentario extends BaseModel implements iDefaultAggregate {
 
+  @EqualsAndHashCode.Include
   private ComentarioId id;
+  
   private Date dataCriacao;
   private String titulo;
   private String descricao;

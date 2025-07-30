@@ -66,7 +66,8 @@ public class AlterarDadosProjetoUseCaseTest {
     var command = new AlterarDadosProjetoCommand(
         projetoId,
         newTitle,
-        newDescription
+        newDescription,
+        1L
     );
 
     // simula que o projeto já existe no repositório
@@ -100,7 +101,8 @@ public class AlterarDadosProjetoUseCaseTest {
     var command = new AlterarDadosProjetoCommand(
         projetoId,
         "Qualquer Título",
-        "Qualquer Descrição");
+        "Qualquer Descrição",
+        1L);
 
     when(projetoRepository.findById(projetoId)).thenReturn(Optional.empty());
 
@@ -124,7 +126,7 @@ public class AlterarDadosProjetoUseCaseTest {
 
     var projeto = new Projeto(projetoId, titulo, descricao, 1L, new HashSet<>());
 
-    var command = new AlterarDadosProjetoCommand(projetoId, titulo, descricao);
+    var command = new AlterarDadosProjetoCommand(projetoId, titulo, descricao, 1L);
 
     when(projetoRepository.findById(projetoId)).thenReturn(Optional.of(projeto));
 

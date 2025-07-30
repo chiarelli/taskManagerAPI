@@ -3,6 +3,7 @@ package com.github.chiarelli.taskmanager.domain.model;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import com.github.chiarelli.taskmanager.domain.dto.AlterarProjeto;
@@ -15,6 +16,7 @@ import com.github.chiarelli.taskmanager.domain.event.ProjetoAlteradoEvent;
 import com.github.chiarelli.taskmanager.domain.event.ProjetoCriadoEvent;
 import com.github.chiarelli.taskmanager.domain.event.ProjetoExcluidoEvent;
 import com.github.chiarelli.taskmanager.domain.event.TarefaAdicionadaEvent;
+import com.github.chiarelli.taskmanager.domain.exception.CommandAlreadyProcessedException;
 import com.github.chiarelli.taskmanager.domain.exception.DomainException;
 import com.github.chiarelli.taskmanager.domain.vo.eStatusTarefaVO;
 
@@ -72,9 +74,12 @@ public class Projeto extends BaseModel implements iDefaultAggregate {
     return projeto;
   }
 
-  public void alterarDadosDoProjeto(AlterarProjeto data) {
+  public void alterarDadosDoProjeto(AlterarProjeto data) throws DomainException, CommandAlreadyProcessedException {
+    if (this.version != data.version()) {
+      throw new DomainException(Map.of("conflito", "Versão do projeto %s inválida.".formatted(this.id)));
+    }
     if(this.titulo.equals(data.titulo()) && this.descricao.equals(data.descricao())) {
-      return; // Não houve alteração  
+      throw new CommandAlreadyProcessedException("Projeto %s não foi alterado.".formatted(this.id)); 
     }
     this.titulo = data.titulo();
     this.descricao = data.descricao();

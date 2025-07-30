@@ -7,6 +7,7 @@ import com.github.chiarelli.taskmanager.application.exceptions.NotFoundException
 import com.github.chiarelli.taskmanager.application.shared.CommandHandler;
 import com.github.chiarelli.taskmanager.application.shared.EventsDispatcher;
 import com.github.chiarelli.taskmanager.application.usecases.commands.AlterarDadosProjetoCommand;
+import com.github.chiarelli.taskmanager.domain.exception.CommandAlreadyProcessedException;
 import com.github.chiarelli.taskmanager.domain.exception.DomainException;
 import com.github.chiarelli.taskmanager.domain.model.Projeto;
 import com.github.chiarelli.taskmanager.domain.repository.iProjetoRepository;
@@ -29,8 +30,12 @@ public class AlterarDadosProjetoUseCase implements CommandHandler<AlterarDadosPr
       .orElseThrow(() -> new NotFoundException("Projeto %s nao encontrado".formatted(command.projetoId())));
     
     var data = command.toAlterarProjeto();
-    
-    projeto.alterarDadosDoProjeto(data);
+
+    try {
+      projeto.alterarDadosDoProjeto(data);      
+    } catch (CommandAlreadyProcessedException e) {
+      return ProjetoDTO.fromWithTarefas(projeto);
+    }
     
     var validator = new GenericValidator<>(projeto);
     validator.assertValid(); // valida o domínio, em caso de erro, lanca uma DomainException

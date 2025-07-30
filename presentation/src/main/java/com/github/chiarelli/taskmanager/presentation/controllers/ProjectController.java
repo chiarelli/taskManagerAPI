@@ -2,8 +2,10 @@ package com.github.chiarelli.taskmanager.presentation.controllers;
 
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.github.chiarelli.taskmanager.application.dtos.ProjetoDTO;
@@ -19,17 +22,22 @@ import com.github.chiarelli.taskmanager.application.usecases.commands.AlterarDad
 import com.github.chiarelli.taskmanager.application.usecases.commands.CriarProjetoCommand;
 import com.github.chiarelli.taskmanager.application.usecases.commands.ExcluirProjetoCommand;
 import com.github.chiarelli.taskmanager.application.usecases.queries.BuscarProjetoPorIdQuery;
+import com.github.chiarelli.taskmanager.application.usecases.queries.ListagemPaginadaProjetosQuery;
 import com.github.chiarelli.taskmanager.domain.entity.ProjetoId;
 import com.github.chiarelli.taskmanager.presentation.dtos.CreateProjectRequest;
+import com.github.chiarelli.taskmanager.presentation.dtos.PageCollectionJsonResponse;
 import com.github.chiarelli.taskmanager.presentation.dtos.ProjectRequest;
 import com.github.chiarelli.taskmanager.presentation.dtos.ProjectResponse;
 
 import io.github.jkratz55.mediator.core.Mediator;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1/projects")
+@Validated
 @RequiredArgsConstructor
 public class ProjectController {
 
@@ -49,6 +57,16 @@ public class ProjectController {
     return ResponseEntity.ok(ProjectResponse.from(projeto));
   }
 
+  @GetMapping
+  public ResponseEntity<PageCollectionJsonResponse<ProjectResponse>> getAll(
+    @RequestParam(name = "page", required = false, defaultValue = "1") @Min(1) Integer page,
+    @RequestParam(name = "pageSize", required = false, defaultValue = "10") @Min(1) @Max(100) Integer pageSize
+  ) {
+    Page<ProjetoDTO> result = mediator.dispatch(new ListagemPaginadaProjetosQuery(page, pageSize));
+
+    return ResponseEntity.ok(new PageCollectionJsonResponse<>(result.map(ProjectResponse::from)));
+  }
+  
   @PutMapping("{projectId}")  
   public ResponseEntity<ProjectResponse> update(
     @PathVariable(value = "projectId") UUID projectId,

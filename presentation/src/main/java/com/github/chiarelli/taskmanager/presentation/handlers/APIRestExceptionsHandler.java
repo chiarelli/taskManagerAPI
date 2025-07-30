@@ -22,6 +22,9 @@ import com.github.chiarelli.taskmanager.application.exceptions.NotFoundException
 import com.github.chiarelli.taskmanager.domain.exception.DomainException;
 import com.github.chiarelli.taskmanager.presentation.dtos.BadRequestResponse;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+
 @ControllerAdvice
 public class APIRestExceptionsHandler {
 
@@ -29,6 +32,18 @@ public class APIRestExceptionsHandler {
   public ResponseEntity<BadRequestResponse> handleUIException(DomainException ex) {
     var badResp = new BadRequestResponse(ex.getViolations());
     return new ResponseEntity<>(badResp, HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(ConstraintViolationException.class)
+  public ResponseEntity<Object> handleConstraintViolation(ConstraintViolationException ex) {
+    Map<String, Object> body = Map.of(
+        "status", 400,
+        "message", "Parâmetros inválidos",
+        "erros", ex.getConstraintViolations().stream()
+            .map(ConstraintViolation::getMessage)
+            .toList());
+            
+    return ResponseEntity.badRequest().body(body);
   }
 
   @ExceptionHandler(NotFoundException.class)

@@ -236,4 +236,61 @@ public class ProjectControllerTest extends MongoTestContainer {
         .andExpect(status().isNoContent());
   }
 
+  @Test
+  void listarProjetos_comDados_retorna200ELista() throws Exception {
+      // Arrange: cria dois projetos
+      for (int i = 1; i <= 2; i++) {
+          mockMvc.perform(post(URL_BASE)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content("""
+                          {
+                            "titulo": "Projeto %d",
+                            "descricao": "Descrição %d"
+                          }
+                          """.formatted(i, i)))
+                  .andExpect(status().isCreated());
+      }
+
+      // Act & Assert: lista os projetos criados
+      mockMvc.perform(get(URL_BASE)
+              .param("page", "1")
+              .param("pageSize", "10"))
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$.page").value(1))
+              .andExpect(jsonPath("$.size").value(10))
+              .andExpect(jsonPath("$.total_query_count").value(2))
+              .andExpect(jsonPath("$.total_pages").value(1))
+              .andExpect(jsonPath("$.content.length()").value(2))
+              .andExpect(jsonPath("$.content[0].titulo").exists());
+  }
+
+  @Test
+  void listarProjetos_semDados_retornaPaginaVazia() throws Exception {
+      mockMvc.perform(get(URL_BASE)
+              .param("page", "1")
+              .param("pageSize", "10"))
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$.page").value(1))
+              .andExpect(jsonPath("$.size").value(10))
+              .andExpect(jsonPath("$.total_query_count").value(0))
+              .andExpect(jsonPath("$.total_pages").value(0))
+              .andExpect(jsonPath("$.content").isArray())
+              .andExpect(jsonPath("$.content").isEmpty());
+  }
+
+  @Test
+  void listarProjetos_comParametrosInvalidos_retorna400() throws Exception {
+      mockMvc.perform(get(URL_BASE)
+          .param("page", "0")        // inválido: mínimo é 1
+          .param("pageSize", "0"))   // inválido: mínimo é 1
+        // .andDo(System.out::println)
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.status").value(400))
+        .andExpect(jsonPath("$.message").value("Parâmetros inválidos"))
+        .andExpect(jsonPath("$.erros").isArray())
+        .andExpect(jsonPath("$.erros.length()").value(2))
+        .andExpect(jsonPath("$.erros[0]").isNotEmpty())
+        .andExpect(jsonPath("$.erros[1]").isNotEmpty());
+  }
+
 }

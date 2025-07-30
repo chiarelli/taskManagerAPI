@@ -19,7 +19,7 @@ import org.springframework.data.domain.PageRequest;
 
 import com.github.chiarelli.taskmanager.application.dtos.ProjetoDTO;
 import com.github.chiarelli.taskmanager.application.repository.IProjectReaderRepository;
-import com.github.chiarelli.taskmanager.application.usecases.queries.ListagemPaginadaProjetosQuery;
+import com.github.chiarelli.taskmanager.application.usecases.queries.ListagemPaginadaGenericQuery;
 import com.github.chiarelli.taskmanager.domain.entity.ProjetoId;
 import com.github.chiarelli.taskmanager.domain.exception.DomainException;
 
@@ -35,7 +35,7 @@ public class ListagemPaginadaProjetosUseCaseTest {
   @Test
   void deveListarProjetosComPaginacaoCorreta() {
     // Arrange
-    var query = new ListagemPaginadaProjetosQuery(2, 5);
+    var query = new ListagemPaginadaGenericQuery<ProjetoDTO>(2, 5);
     var pageable = PageRequest.of(1, 5); // page=2 → index=1
 
     var projetoDTO = new ProjetoDTO();
@@ -61,7 +61,7 @@ public class ListagemPaginadaProjetosUseCaseTest {
   @Test
   void deveLancarExcecao_aoReceberParametrosInvalidos() {
     // Arrange
-    var query = new ListagemPaginadaProjetosQuery(0, 5); // página inválida
+    var query = new ListagemPaginadaGenericQuery<ProjetoDTO>(0, 5); // página inválida
 
     // Act & Assert
     var violations = assertThrows(DomainException.class, () -> useCase.handle(query)).getViolations();

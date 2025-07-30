@@ -22,7 +22,7 @@ import com.github.chiarelli.taskmanager.application.usecases.commands.AlterarDad
 import com.github.chiarelli.taskmanager.application.usecases.commands.CriarProjetoCommand;
 import com.github.chiarelli.taskmanager.application.usecases.commands.ExcluirProjetoCommand;
 import com.github.chiarelli.taskmanager.application.usecases.queries.BuscarProjetoPorIdQuery;
-import com.github.chiarelli.taskmanager.application.usecases.queries.ListagemPaginadaProjetosQuery;
+import com.github.chiarelli.taskmanager.application.usecases.queries.ListagemPaginadaGenericQuery;
 import com.github.chiarelli.taskmanager.domain.entity.ProjetoId;
 import com.github.chiarelli.taskmanager.presentation.dtos.CreateProjectRequest;
 import com.github.chiarelli.taskmanager.presentation.dtos.PageCollectionJsonResponse;
@@ -62,7 +62,7 @@ public class ProjectController {
     @RequestParam(name = "page", required = false, defaultValue = "1") @Min(1) Integer page,
     @RequestParam(name = "pageSize", required = false, defaultValue = "10") @Min(1) @Max(100) Integer pageSize
   ) {
-    Page<ProjetoDTO> result = mediator.dispatch(new ListagemPaginadaProjetosQuery(page, pageSize));
+    Page<ProjetoDTO> result = mediator.dispatch(new ListagemPaginadaGenericQuery<>(page, pageSize));
 
     return ResponseEntity.ok(new PageCollectionJsonResponse<>(result.map(ProjectResponse::from)));
   }

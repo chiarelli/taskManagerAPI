@@ -75,4 +75,9 @@ public class ProjetoMongoRepository implements iProjetoRepository {
     return optional.get().getTarefas().stream().toList();
   }
 
+  @Override
+  public boolean existsById(ProjetoId id) {
+    return mongoRepository.existsById(id.getId());
+  }
+
 }

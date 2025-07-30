@@ -12,6 +12,8 @@ public interface iProjetoRepository {
 
   Optional<Projeto> findById(ProjetoId id);
 
+  boolean existsById(ProjetoId id);
+
   Optional<Tarefa> findTarefaByProjetoId(ProjetoId projetoId, TarefaId tarefaId);
 
   void save(Projeto projeto);

@@ -56,4 +56,9 @@ public class ProjetoRepositoryMock implements iProjetoRepository {
     throw new UnsupportedOperationException("Unimplemented method 'findAllTarefasByProjetoId'");
   }
 
+  @Override
+  public boolean existsById(ProjetoId id) {
+    return false;
+  }
+
 }

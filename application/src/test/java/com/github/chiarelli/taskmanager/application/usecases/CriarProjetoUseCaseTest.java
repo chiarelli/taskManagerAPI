@@ -77,7 +77,7 @@ public class CriarProjetoUseCaseTest {
         .map(String::valueOf)
         .collect(Collectors.toList());
 
-    assertThat(mensagens).contains("O título é obrigatório");
+    assertThat(mensagens).contains("O título deve ter entre 3 e 100 caracteres");
     verify(projetoRepository, never()).save(any());
     verify(dispatcher, never()).emitAll();
   }

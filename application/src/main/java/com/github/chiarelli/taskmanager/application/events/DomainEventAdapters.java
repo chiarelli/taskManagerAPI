@@ -26,6 +26,12 @@ public class DomainEventAdapters {
       super((Projeto) aggregate, payload);
     }    
   }
+  
+  public static class TarefaAdicionadaEventAdapter extends TarefaAdicionadaEvent implements Event {
+    public TarefaAdicionadaEventAdapter(iDefaultAggregate aggregate, TarefaId tarefaId) {
+      super(aggregate, tarefaId);
+    }    
+  }
 
   public static class ComentarioAdicionadoEventAdapter extends ComentarioAdicionadoEvent implements Event {
     public ComentarioAdicionadoEventAdapter(iDefaultAggregate aggregate,Payload payload) {

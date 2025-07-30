@@ -4,7 +4,10 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -32,6 +35,18 @@ public class APIRestExceptionsHandler {
   public ResponseEntity<BadRequestResponse> handleNotFoundException(NotFoundException ex) {
     var badResp = new BadRequestResponse(Map.of("not_found", ex.getMessage()));
     return new ResponseEntity<>(badResp, HttpStatus.NOT_FOUND);
+  }
+
+  @ExceptionHandler(OptimisticLockingFailureException.class)
+  public ResponseEntity<BadRequestResponse> handleOptimisticLockingFailure(OptimisticLockingFailureException ex) {
+      String rawMessage = ex.getMessage();
+      String id = extractEntityId(rawMessage);
+
+      Map<String, Object> body = new HashMap<>();
+      body.put("conflito", "A entidade com ID %s foi modificada por outro processo. Atualize os dados e tente novamente.".formatted(id));
+
+      var badResp = new BadRequestResponse(body);
+      return new ResponseEntity<>(badResp, HttpStatus.CONFLICT);
   }
 
   @ExceptionHandler(HttpMessageNotReadableException.class)
@@ -113,6 +128,15 @@ public class APIRestExceptionsHandler {
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
         .body(Map.of(
             "error", "Erro interno no servidor. Tente novamente mais tarde."));
+  }
+
+  private String extractEntityId(String message) {
+      Pattern pattern = Pattern.compile("entity\\s+([\\w\\-]+)\\s+with\\s+version");
+      Matcher matcher = pattern.matcher(message);
+      if (matcher.find()) {
+          return matcher.group(1); // retorna o UUID
+      }
+      return "desconhecido"; // fallback
   }
   
 }

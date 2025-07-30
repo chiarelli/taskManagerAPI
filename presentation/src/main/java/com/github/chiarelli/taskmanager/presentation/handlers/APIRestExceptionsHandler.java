@@ -39,14 +39,23 @@ public class APIRestExceptionsHandler {
 
   @ExceptionHandler(OptimisticLockingFailureException.class)
   public ResponseEntity<BadRequestResponse> handleOptimisticLockingFailure(OptimisticLockingFailureException ex) {
-      String rawMessage = ex.getMessage();
-      String id = extractEntityId(rawMessage);
+    String rawMessage = ex.getMessage();
+    String id = extractEntityId(rawMessage);
+    
+    Map<String, Object> body = new HashMap<>();
+    body.put("conflito", "A entidade com ID %s foi modificada por outro processo. Atualize os dados e tente novamente.".formatted(id));
+    
+    var badResp = new BadRequestResponse(body);
+    return new ResponseEntity<>(badResp, HttpStatus.CONFLICT);
+  }
 
-      Map<String, Object> body = new HashMap<>();
-      body.put("conflito", "A entidade com ID %s foi modificada por outro processo. Atualize os dados e tente novamente.".formatted(id));
-
-      var badResp = new BadRequestResponse(body);
-      return new ResponseEntity<>(badResp, HttpStatus.CONFLICT);
+  @ExceptionHandler(com.github.chiarelli.taskmanager.domain.exception.OptimisticLockingFailureException.class)
+  public ResponseEntity<BadRequestResponse> handleDomainOptimisticLockingFailure(com.github.chiarelli.taskmanager.domain.exception.OptimisticLockingFailureException ex) {
+    Map<String, Object> body = new HashMap<>();
+    body.put("conflito", ex.getMessage());
+    
+    var badResp = new BadRequestResponse(body);
+    return new ResponseEntity<>(badResp, HttpStatus.CONFLICT);
   }
 
   @ExceptionHandler(HttpMessageNotReadableException.class)

@@ -13,5 +13,6 @@ public record AlterarTarefa(
   String descricao,
   DataVencimentoVO dataVencimento,
   eStatusTarefaVO status,
-  ePrioridadeVO prioridade
+  ePrioridadeVO prioridade,
+  Long projetoVersao
 ) {}

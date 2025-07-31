@@ -23,6 +23,7 @@ import com.github.chiarelli.taskmanager.domain.event.ComentarioAdicionadoEvent;
 import com.github.chiarelli.taskmanager.domain.event.StatusTarefaAlteradoEvent;
 import com.github.chiarelli.taskmanager.domain.event.TarefaAlteradaEvent;
 import com.github.chiarelli.taskmanager.domain.event.TarefaExcluidaEvent;
+import com.github.chiarelli.taskmanager.domain.exception.CommandAlreadyProcessedException;
 import com.github.chiarelli.taskmanager.domain.exception.DomainException;
 import com.github.chiarelli.taskmanager.domain.validation.GenericValidator;
 import com.github.chiarelli.taskmanager.domain.vo.DataVencimentoVO;
@@ -85,7 +86,8 @@ public class TarefaTest {
   void deveAlterarDescricaoComSucessoEEmitirEvento() {
     var novaDescricao = "Nova descrição";
 
-    tarefa.alterarDados(projeto, tarefa.getTitulo(), novaDescricao, tarefa.getDataVencimento(), historico);
+    tarefa.alterarDados(projeto, tarefa.getTitulo(), novaDescricao, 
+        tarefa.getDataVencimento(), tarefa.getPrioridade(), historico);
 
     assertThat(tarefa.getDescricao()).isEqualTo(novaDescricao);
     assertThat(tarefa.getHistoricos()).contains(historico.getId());
@@ -94,8 +96,12 @@ public class TarefaTest {
 
   @Test
   void naoDeveEmitirEventoSeDescricaoNaoMudar() {
-    tarefa.alterarDados(projeto, tarefa.getTitulo(), "Descrição", tarefa.getDataVencimento(), historico);
+    var ex = assertThrows(CommandAlreadyProcessedException.class, () -> {
+      tarefa.alterarDados(projeto, tarefa.getTitulo(), "Descrição", 
+          tarefa.getDataVencimento(), tarefa.getPrioridade(), historico);
+    });
 
+    assertThat(ex.getMessage()).isEqualTo("Tarefa %s nao foi alterada.".formatted(tarefa.getId()));
     assertThat(tarefa.flushEvents()).isEmpty();
   }
 

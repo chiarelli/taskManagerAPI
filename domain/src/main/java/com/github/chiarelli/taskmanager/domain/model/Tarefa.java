@@ -13,6 +13,7 @@ import com.github.chiarelli.taskmanager.domain.event.HistoricoAdicionadoEvent;
 import com.github.chiarelli.taskmanager.domain.event.StatusTarefaAlteradoEvent;
 import com.github.chiarelli.taskmanager.domain.event.TarefaAlteradaEvent;
 import com.github.chiarelli.taskmanager.domain.event.TarefaExcluidaEvent;
+import com.github.chiarelli.taskmanager.domain.exception.CommandAlreadyProcessedException;
 import com.github.chiarelli.taskmanager.domain.exception.DomainException;
 import com.github.chiarelli.taskmanager.domain.vo.DataVencimentoVO;
 import com.github.chiarelli.taskmanager.domain.vo.ePrioridadeVO;
@@ -85,17 +86,19 @@ public class Tarefa extends BaseModel {
     String novoTitulo,
     String novaDescricao,
     DataVencimentoVO novaDataVencimento,
-    Historico historico
-  ) {
-    if (this.descricao.equals(novaDescricao) && this.titulo.equals(novoTitulo)
-        && this.dataVencimento.equals(novaDataVencimento)) {
-      return;
+    ePrioridadeVO novoPrioridade,
+    Historico historico) throws CommandAlreadyProcessedException {
+
+    if (this.titulo.equals(novoTitulo) && this.descricao.equals(novaDescricao)
+        && this.dataVencimento.equals(novaDataVencimento) && this.prioridade.equals(novoPrioridade)) {
+      throw new CommandAlreadyProcessedException("Tarefa %s nao foi alterada.".formatted(this.id));
     }
     this.titulo = novoTitulo;
     this.descricao = novaDescricao;
     this.dataVencimento = novaDataVencimento;
+    this.prioridade = novoPrioridade;
 
-    adicionarHistorico(projeto,historico);
+    adicionarHistorico(projeto, historico);
 
     var payload = new TarefaAlteradaEvent.Payload(this.getId(), this.titulo, this.descricao, 
         this.dataVencimento, this.status, this.prioridade);

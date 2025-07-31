@@ -103,7 +103,7 @@ public class TarefaServiceTest {
 
     var data = new AlterarTarefa(projeto.getId(), tarefa.getId(), 
       tarefa.getTitulo(), tarefa.getDescricao(), tarefa.getDataVencimento(), 
-      novoStatus, tarefa.getPrioridade());
+      novoStatus, tarefa.getPrioridade(), 0L);
 
     List<AbstractDomainEvent<?>> events = tarefaService.alterarStatusComHistorico(data, autorId).flushEvents();
 
@@ -133,7 +133,7 @@ public class TarefaServiceTest {
 
     var data = new AlterarTarefa(projeto.getId(), tarefa.getId(), 
       tarefa.getTitulo(), novaDescricao, tarefa.getDataVencimento(), 
-      tarefa.getStatus(), tarefa.getPrioridade());
+      tarefa.getStatus(), tarefa.getPrioridade(), 1L);
 
     List<AbstractDomainEvent<?>> events = tarefaService.alterarDadosComHistorico(data, autor).flushEvents();
 

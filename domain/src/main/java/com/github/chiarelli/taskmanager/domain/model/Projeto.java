@@ -19,6 +19,7 @@ import com.github.chiarelli.taskmanager.domain.exception.CommandAlreadyProcessed
 import com.github.chiarelli.taskmanager.domain.exception.DomainException;
 import com.github.chiarelli.taskmanager.domain.exception.OptimisticLockingFailureException;
 import com.github.chiarelli.taskmanager.domain.vo.DataVencimentoVO;
+import com.github.chiarelli.taskmanager.domain.vo.ePrioridadeVO;
 import com.github.chiarelli.taskmanager.domain.vo.eStatusTarefaVO;
 
 import lombok.AllArgsConstructor;
@@ -177,10 +178,16 @@ public class Projeto extends BaseModel implements iDefaultAggregate {
     String novoTitulo,
     String novaDescricao,
     DataVencimentoVO novaDataVencimento,
+    ePrioridadeVO novoPrioridade,
+    Long projetoVersao,
     Historico historico
   ) {
+    if(this.version != projetoVersao) {
+      throw new OptimisticLockingFailureException("Versão do projeto %s inválida.".formatted(this.id));
+    }
     getTarefaOrThrow(tarefaId)
-        .alterarDados(this, novoTitulo, novaDescricao, novaDataVencimento, historico);
+        .alterarDados(this, novoTitulo, novaDescricao, novaDataVencimento, novoPrioridade, historico);
+
     this.version++;
   }
 

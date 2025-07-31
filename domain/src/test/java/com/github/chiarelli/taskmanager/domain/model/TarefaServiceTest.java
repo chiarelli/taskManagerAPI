@@ -25,7 +25,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.github.chiarelli.taskmanager.domain.dto.AlterarComentario;
-import com.github.chiarelli.taskmanager.domain.dto.AlterarTarefa;
+import com.github.chiarelli.taskmanager.domain.dto.AlterarDadosTarefa;
+import com.github.chiarelli.taskmanager.domain.dto.AlterarStatusTarefa;
 import com.github.chiarelli.taskmanager.domain.dto.CriarComentario;
 import com.github.chiarelli.taskmanager.domain.dto.ExcluirTarefa;
 import com.github.chiarelli.taskmanager.domain.entity.AutorId;
@@ -101,9 +102,7 @@ public class TarefaServiceTest {
     // Simula uma consulta no banco de dados
     when(projetoRepository.findById(projeto.getId())).thenReturn(Optional.of(projeto));
 
-    var data = new AlterarTarefa(projeto.getId(), tarefa.getId(), 
-      tarefa.getTitulo(), tarefa.getDescricao(), tarefa.getDataVencimento(), 
-      novoStatus, tarefa.getPrioridade(), 0L);
+    var data = new AlterarStatusTarefa(projeto.getId(), tarefa.getId(), novoStatus, 0L);
 
     List<AbstractDomainEvent<?>> events = tarefaService.alterarStatusComHistorico(data, autorId).flushEvents();
 
@@ -131,9 +130,9 @@ public class TarefaServiceTest {
     // Simula uma consulta no banco de dados
     when(projetoRepository.findById(projeto.getId())).thenReturn(Optional.of(projeto));
 
-    var data = new AlterarTarefa(projeto.getId(), tarefa.getId(), 
+    var data = new AlterarDadosTarefa(projeto.getId(), tarefa.getId(), 
       tarefa.getTitulo(), novaDescricao, tarefa.getDataVencimento(), 
-      tarefa.getStatus(), tarefa.getPrioridade(), 1L);
+      tarefa.getPrioridade(), 1L);
 
     List<AbstractDomainEvent<?>> events = tarefaService.alterarDadosComHistorico(data, autor).flushEvents();
 

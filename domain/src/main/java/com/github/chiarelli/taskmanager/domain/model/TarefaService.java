@@ -5,7 +5,8 @@ import java.util.Date;
 import java.util.List;
 
 import com.github.chiarelli.taskmanager.domain.dto.AlterarComentario;
-import com.github.chiarelli.taskmanager.domain.dto.AlterarTarefa;
+import com.github.chiarelli.taskmanager.domain.dto.AlterarDadosTarefa;
+import com.github.chiarelli.taskmanager.domain.dto.AlterarStatusTarefa;
 import com.github.chiarelli.taskmanager.domain.dto.CriarComentario;
 import com.github.chiarelli.taskmanager.domain.dto.ExcluirTarefa;
 import com.github.chiarelli.taskmanager.domain.dto.ServiceResult;
@@ -31,7 +32,7 @@ public class TarefaService implements iTarefaService {
   private final iDomainEventBuffer eventBuffer;
   
   @Override
-  public ServiceResult<Void> alterarStatusComHistorico(AlterarTarefa data, AutorId autor) {
+  public ServiceResult<Void> alterarStatusComHistorico(AlterarStatusTarefa data, AutorId autor) {
 
     var resp = loadTarefaByProjetoIdAndTarefaId(data.projetoId(), data.tarefaId());
 
@@ -58,7 +59,7 @@ public class TarefaService implements iTarefaService {
   }
   
   @Override
-  public ServiceResult<Void> alterarDadosComHistorico(AlterarTarefa data, AutorId autor) {
+  public ServiceResult<Void> alterarDadosComHistorico(AlterarDadosTarefa data, AutorId autor) {
     var resp = loadTarefaByProjetoIdAndTarefaId(data.projetoId(), data.tarefaId());
 
     Tarefa tarefa = resp.tarefa();

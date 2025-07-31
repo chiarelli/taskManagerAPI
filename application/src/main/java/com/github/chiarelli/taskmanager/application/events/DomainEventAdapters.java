@@ -33,6 +33,12 @@ public class DomainEventAdapters {
     }    
   }
 
+  public static class TarefaAlteradaEventAdapter extends TarefaAlteradaEvent implements Event {
+    public TarefaAlteradaEventAdapter(iDefaultAggregate aggregate, Payload payload) {
+      super((Projeto) aggregate, payload);
+    }    
+  }
+
   public static class ComentarioAdicionadoEventAdapter extends ComentarioAdicionadoEvent implements Event {
     public ComentarioAdicionadoEventAdapter(iDefaultAggregate aggregate,Payload payload) {
       super(aggregate, payload);
@@ -60,6 +66,12 @@ public class DomainEventAdapters {
   public static class TarefaExcluidaEventAdapter extends TarefaExcluidaEvent implements Event {
     public TarefaExcluidaEventAdapter(iDefaultAggregate projeto, TarefaId tarefaId) {
       super((Projeto) projeto, tarefaId);
+    }
+  }
+
+  public static class HistoricoAdicionadoEventAdapter extends HistoricoAdicionadoEvent implements Event {
+    public HistoricoAdicionadoEventAdapter(iDefaultAggregate aggregate, Payload payload) {
+      super(aggregate, payload);
     }
   }
 

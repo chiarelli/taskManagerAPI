@@ -7,11 +7,13 @@ import java.util.Date;
 import com.github.chiarelli.taskmanager.domain.validation.DateRange;
 
 import jakarta.validation.constraints.NotNull;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Getter
+@EqualsAndHashCode
 public class DataVencimentoVO {
 
   @DateRange(min = "now-1h", message = "A data de vencimento deve ser maior que a data atual")

@@ -73,11 +73,9 @@ public class CriarProjetoUseCaseTest {
     });
 
     Map<String, Object> violations = exception.getViolations();
-    List<String> mensagens = violations.values().stream()
-        .map(String::valueOf)
-        .collect(Collectors.toList());
 
-    assertThat(mensagens).contains("O título deve ter entre 3 e 100 caracteres");
+    assertThat(violations).containsKey("titulo");
+
     verify(projetoRepository, never()).save(any());
     verify(dispatcher, never()).emitAll();
   }

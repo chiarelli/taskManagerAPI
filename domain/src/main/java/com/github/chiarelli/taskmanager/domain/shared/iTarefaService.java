@@ -14,7 +14,7 @@ public interface iTarefaService {
 
   ServiceResult<Void> alterarStatusComHistorico(AlterarTarefa data, AutorId autor);
 
-  ServiceResult<Void> alterarDescricaoComHistorico(AlterarTarefa data, AutorId autor);
+  ServiceResult<Void> alterarDadosComHistorico(AlterarTarefa data, AutorId autor);
 
   ServiceResult<Comentario> adicionarComentarioComHistorico(ProjetoId projetoId, TarefaId tarefaId, CriarComentario comentario);
 

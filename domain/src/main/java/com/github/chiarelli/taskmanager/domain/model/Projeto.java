@@ -18,6 +18,7 @@ import com.github.chiarelli.taskmanager.domain.event.TarefaAdicionadaEvent;
 import com.github.chiarelli.taskmanager.domain.exception.CommandAlreadyProcessedException;
 import com.github.chiarelli.taskmanager.domain.exception.DomainException;
 import com.github.chiarelli.taskmanager.domain.exception.OptimisticLockingFailureException;
+import com.github.chiarelli.taskmanager.domain.vo.DataVencimentoVO;
 import com.github.chiarelli.taskmanager.domain.vo.eStatusTarefaVO;
 
 import lombok.AllArgsConstructor;
@@ -171,9 +172,15 @@ public class Projeto extends BaseModel implements iDefaultAggregate {
     this.version++;
   }
 
-  void alterarDescricaoTarefa(TarefaId tarefaId, String novaDescricao, Historico historico) {
+  void alterarDadosTarefa(
+    TarefaId tarefaId, 
+    String novoTitulo,
+    String novaDescricao,
+    DataVencimentoVO novaDataVencimento,
+    Historico historico
+  ) {
     getTarefaOrThrow(tarefaId)
-        .alterarDescricao(this, novaDescricao, historico);
+        .alterarDados(this, novoTitulo, novaDescricao, novaDataVencimento, historico);
     this.version++;
   }
 

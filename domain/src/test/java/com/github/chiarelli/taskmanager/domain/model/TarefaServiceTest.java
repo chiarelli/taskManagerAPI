@@ -135,7 +135,7 @@ public class TarefaServiceTest {
       tarefa.getTitulo(), novaDescricao, tarefa.getDataVencimento(), 
       tarefa.getStatus(), tarefa.getPrioridade());
 
-    List<AbstractDomainEvent<?>> events = tarefaService.alterarDescricaoComHistorico(data, autor).flushEvents();
+    List<AbstractDomainEvent<?>> events = tarefaService.alterarDadosComHistorico(data, autor).flushEvents();
 
     // Assert
     assertTrue(events.size() == 2, "Deve ter emitido 2 evento");

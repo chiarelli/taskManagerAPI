@@ -2,7 +2,6 @@ package com.github.chiarelli.taskmanager.domain.model;
 
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 import com.github.chiarelli.taskmanager.domain.dto.CriarTarefa;
@@ -81,11 +80,21 @@ public class Tarefa extends BaseModel {
     this.addEvent(new StatusTarefaAlteradoEvent(projeto, payload));
   }
 
-  void alterarDescricao(Projeto projeto, String novaDescricao, Historico historico) {
-    if (Objects.equals(this.descricao, novaDescricao)) {
+  void alterarDados(
+    Projeto projeto,
+    String novoTitulo,
+    String novaDescricao,
+    DataVencimentoVO novaDataVencimento,
+    Historico historico
+  ) {
+    if (this.descricao.equals(novaDescricao) && this.titulo.equals(novoTitulo)
+        && this.dataVencimento.equals(novaDataVencimento)) {
       return;
     }
+    this.titulo = novoTitulo;
     this.descricao = novaDescricao;
+    this.dataVencimento = novaDataVencimento;
+
     adicionarHistorico(projeto,historico);
 
     var payload = new TarefaAlteradaEvent.Payload(this.getId(), this.titulo, this.descricao, 

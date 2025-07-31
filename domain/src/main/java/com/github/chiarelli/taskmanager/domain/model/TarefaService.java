@@ -18,8 +18,8 @@ import com.github.chiarelli.taskmanager.domain.event.HistoricoAdicionadoEvent;
 import com.github.chiarelli.taskmanager.domain.exception.DomainException;
 import com.github.chiarelli.taskmanager.domain.repository.iProjetoRepository;
 import com.github.chiarelli.taskmanager.domain.repository.iTarefasRepository;
-import com.github.chiarelli.taskmanager.domain.shared.iTarefaService;
 import com.github.chiarelli.taskmanager.domain.shared.iDomainEventBuffer;
+import com.github.chiarelli.taskmanager.domain.shared.iTarefaService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -58,7 +58,7 @@ public class TarefaService implements iTarefaService {
   }
   
   @Override
-  public ServiceResult<Void> alterarDescricaoComHistorico(AlterarTarefa data, AutorId autor) {
+  public ServiceResult<Void> alterarDadosComHistorico(AlterarTarefa data, AutorId autor) {
     var resp = loadTarefaByProjetoIdAndTarefaId(data.projetoId(), data.tarefaId());
 
     Tarefa tarefa = resp.tarefa();
@@ -67,12 +67,13 @@ public class TarefaService implements iTarefaService {
     var historico = new Historico(
       new HistoricoId(),
       new Date(),
-      "Alteração de Descrição",
-      "Alterado de " + tarefa.getDescricao() + " para " + data.descricao(),
+      "Alteração de dados da Tarefa",
+      data.toString(),
       autor
     );
 
-    projeto.alterarDescricaoTarefa(tarefa.getId(), data.descricao(), historico);
+    projeto.alterarDadosTarefa(tarefa.getId(), data.titulo(), data.descricao(), 
+        data.dataVencimento(), historico);
 
     projetoRepository.save(projeto);
     tarefaRepository.saveHistorico(tarefa.getId(), historico);

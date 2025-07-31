@@ -85,7 +85,7 @@ public class TarefaTest {
   void deveAlterarDescricaoComSucessoEEmitirEvento() {
     var novaDescricao = "Nova descrição";
 
-    tarefa.alterarDescricao(projeto, novaDescricao, historico);
+    tarefa.alterarDados(projeto, tarefa.getTitulo(), novaDescricao, tarefa.getDataVencimento(), historico);
 
     assertThat(tarefa.getDescricao()).isEqualTo(novaDescricao);
     assertThat(tarefa.getHistoricos()).contains(historico.getId());
@@ -94,7 +94,7 @@ public class TarefaTest {
 
   @Test
   void naoDeveEmitirEventoSeDescricaoNaoMudar() {
-    tarefa.alterarDescricao(projeto, "Descrição", historico);
+    tarefa.alterarDados(projeto, tarefa.getTitulo(), "Descrição", tarefa.getDataVencimento(), historico);
 
     assertThat(tarefa.flushEvents()).isEmpty();
   }

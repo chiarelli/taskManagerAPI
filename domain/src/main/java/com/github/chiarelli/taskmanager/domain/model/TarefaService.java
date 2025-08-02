@@ -32,7 +32,7 @@ public class TarefaService implements iTarefaService {
   private final iDomainEventBuffer eventBuffer;
   
   @Override
-  public ServiceResult<Void> alterarStatusComHistorico(AlterarStatusTarefa data, AutorId autor) {
+  public ServiceResult<Tarefa> alterarStatusComHistorico(AlterarStatusTarefa data, AutorId autor) {
 
     var resp = loadTarefaByProjetoIdAndTarefaId(data.projetoId(), data.tarefaId());
 
@@ -55,11 +55,11 @@ public class TarefaService implements iTarefaService {
     eventBuffer.collectFrom(projeto);
     eventBuffer.collectFrom(tarefa);
 
-    return new ServiceResult<>(null, eventBuffer.flushEvents());
+    return new ServiceResult<>(tarefa, eventBuffer.flushEvents());
   }
   
   @Override
-  public ServiceResult<Void> alterarDadosComHistorico(AlterarDadosTarefa data, AutorId autor) {
+  public ServiceResult<Tarefa> alterarDadosComHistorico(AlterarDadosTarefa data, AutorId autor) {
     var resp = loadTarefaByProjetoIdAndTarefaId(data.projetoId(), data.tarefaId());
 
     Tarefa tarefa = resp.tarefa();
@@ -82,7 +82,7 @@ public class TarefaService implements iTarefaService {
     eventBuffer.collectFrom(projeto);
     eventBuffer.collectFrom(tarefa);
 
-    return new ServiceResult<>(null, eventBuffer.flushEvents());
+    return new ServiceResult<>(tarefa, eventBuffer.flushEvents());
   }
   
   @Override
@@ -114,7 +114,7 @@ public class TarefaService implements iTarefaService {
   }
   
   @Override
-  public ServiceResult<Void> alterarComentarioComHistorico(ProjetoId projetoId, TarefaId tarefaId, AlterarComentario data) {
+  public ServiceResult<Comentario> alterarComentarioComHistorico(ProjetoId projetoId, TarefaId tarefaId, AlterarComentario data) {
     var resp = loadTarefaByProjetoIdAndTarefaId(projetoId, tarefaId);
 
     Tarefa tarefa = resp.tarefa();
@@ -147,7 +147,7 @@ public class TarefaService implements iTarefaService {
     List<AbstractDomainEvent<?>> events = new ArrayList<>(eventBuffer.flushEvents());
                                  events.add(event);
 
-    return new ServiceResult<>(null, events);
+    return new ServiceResult<>(comentario, events);
   }
 
   @Override

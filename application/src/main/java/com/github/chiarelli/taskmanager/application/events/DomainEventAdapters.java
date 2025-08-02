@@ -39,6 +39,12 @@ public class DomainEventAdapters {
     }    
   }
 
+  public static class StatusTarefaAlteradoEventAdapter extends StatusTarefaAlteradoEvent implements Event {
+    public StatusTarefaAlteradoEventAdapter(iDefaultAggregate aggregate, Payload payload) {
+      super((Projeto) aggregate, payload);
+    }    
+  }
+
   public static class ComentarioAdicionadoEventAdapter extends ComentarioAdicionadoEvent implements Event {
     public ComentarioAdicionadoEventAdapter(iDefaultAggregate aggregate,Payload payload) {
       super(aggregate, payload);

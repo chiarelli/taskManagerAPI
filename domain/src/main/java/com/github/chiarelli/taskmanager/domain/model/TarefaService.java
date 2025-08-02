@@ -47,7 +47,7 @@ public class TarefaService implements iTarefaService {
       autor
     );
     
-    projeto.alterarStatusTarefa(tarefa.getId(), data.status(), historico);
+    projeto.alterarStatusTarefa(tarefa.getId(), data.status(), data.projetoVersao(), historico);
 
     projetoRepository.save(projeto);
     tarefaRepository.saveHistorico(tarefa.getId(), historico);

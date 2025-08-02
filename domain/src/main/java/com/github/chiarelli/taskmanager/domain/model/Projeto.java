@@ -167,7 +167,10 @@ public class Projeto extends BaseModel implements iDefaultAggregate {
     return tarefa;
   }
 
-  void alterarStatusTarefa(TarefaId tarefaId, eStatusTarefaVO novoStatus, Historico historico) {
+  void alterarStatusTarefa(TarefaId tarefaId, eStatusTarefaVO novoStatus, Long projetoVersao, Historico historico) {
+    if(this.version != projetoVersao) {
+      throw new OptimisticLockingFailureException("Versão do projeto %s inválida.".formatted(this.id));
+    }
     getTarefaOrThrow(tarefaId)
         .alterarStatus(this, novoStatus, historico);
     this.version++;

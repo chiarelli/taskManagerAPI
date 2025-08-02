@@ -160,12 +160,18 @@ class AlterarDadosTarefaUseCaseTest {
 
     when(projetoRepository.findById(projetoId)).thenReturn(Optional.of(projeto));
 
+    ArgumentCaptor<Event> captor = ArgumentCaptor.forClass(Event.class);
+
     // Act & Assert
     DomainException ex = assertThrows(DomainException.class, () -> useCase.handle(command));
 
     assertEquals(1, ex.getViolations().size());
     assertThat(ex.getViolations())
       .containsEntry("error", "Tarefa %s não pertence ao projeto %s".formatted(command.tarefaId(), command.projetoId()));
+    
+    // Verifica se os eventos foram coletados no dispatcher
+    verify(mediator, never()).emit(captor.capture());
+    verify(dispatcher, never()).emitAll();
   }
 
   @Test
@@ -178,6 +184,8 @@ class AlterarDadosTarefaUseCaseTest {
 
     when(tarefaServiceMock.alterarDadosComHistorico(any(), any()))
         .thenThrow(new CommandAlreadyProcessedException("já processado"));
+    
+    ArgumentCaptor<Event> captor = ArgumentCaptor.forClass(Event.class);
 
     // Act
     TarefaDTO dto = useCase.handle(command);
@@ -185,6 +193,10 @@ class AlterarDadosTarefaUseCaseTest {
     // Assert
     assertNotNull(dto);
     verify(dispatcher, never()).emitAll(); // eventos não são enviados
+
+    // Verifica se os eventos foram coletados no dispatcher
+    verify(mediator, never()).emit(captor.capture());
+    verify(dispatcher, never()).emitAll();
   }
 
   @Test

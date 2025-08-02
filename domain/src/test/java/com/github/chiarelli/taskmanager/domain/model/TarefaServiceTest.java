@@ -102,7 +102,7 @@ public class TarefaServiceTest {
     // Simula uma consulta no banco de dados
     when(projetoRepository.findById(projeto.getId())).thenReturn(Optional.of(projeto));
 
-    var data = new AlterarStatusTarefa(projeto.getId(), tarefa.getId(), novoStatus, 0L);
+    var data = new AlterarStatusTarefa(projeto.getId(), tarefa.getId(), novoStatus, 1L);
 
     List<AbstractDomainEvent<?>> events = tarefaService.alterarStatusComHistorico(data, autorId).flushEvents();
 

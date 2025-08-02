@@ -89,4 +89,16 @@ public class ListagemTarefasDoProjetoUseCaseTest {
     assertThrows(DomainException.class, query::validate);
   }
   
+  @Test
+  void deveRetornarListaVazia_quandoProjetoNaoTemTarefas() {
+    ListagemTarefasDoProjetoQuery query = new ListagemTarefasDoProjetoQuery(projetoId);
+
+    when(projetoRepository.existsById(projetoId)).thenReturn(true);
+    when(projetoRepository.findAllTarefasByProjetoId(projetoId)).thenReturn(List.of());
+
+    List<TarefaDTO> tarefas = useCase.handle(query);
+
+    assertTrue(tarefas.isEmpty());
+  }
+
 }

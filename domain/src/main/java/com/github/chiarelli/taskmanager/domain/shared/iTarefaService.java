@@ -14,11 +14,11 @@ import com.github.chiarelli.taskmanager.domain.model.Tarefa;
 
 public interface iTarefaService {
 
-  ServiceResult<Tarefa> alterarStatusComHistorico(AlterarStatusTarefa data, AutorId autor);
+  ServiceResult<Tarefa> alterarStatusComHistorico(AlterarStatusTarefa data, AutorId autorId);
 
-  ServiceResult<Tarefa> alterarDadosComHistorico(AlterarDadosTarefa data, AutorId autor);
+  ServiceResult<Tarefa> alterarDadosComHistorico(AlterarDadosTarefa data, AutorId autorId);
 
-  ServiceResult<Comentario> adicionarComentarioComHistorico(ProjetoId projetoId, TarefaId tarefaId, CriarComentario comentario);
+  ServiceResult<Comentario> adicionarComentarioComHistorico(ProjetoId projetoId, TarefaId tarefaId, CriarComentario data);
 
   ServiceResult<Comentario> alterarComentarioComHistorico(ProjetoId projetoId, TarefaId tarefaId, AlterarComentario data);
 

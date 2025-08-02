@@ -32,18 +32,19 @@ public class AlterarDadosProjetoUseCase implements CommandHandler<AlterarDadosPr
     var data = command.toAlterarProjeto();
 
     try {
-      projeto.alterarDadosDoProjeto(data);      
+      projeto.alterarDadosDoProjeto(data);
+
+      var validator = new GenericValidator<>(projeto);
+      validator.assertValid(); // valida o domínio, em caso de erro, lanca uma DomainException
+      
+      projetoRepository.save(projeto);
+      
+      dispatcher.collectFrom(projeto);
+      dispatcher.emitAll();
+
     } catch (CommandAlreadyProcessedException e) {
-      return ProjetoDTO.fromWithTarefas(projeto);
+      // Não precisa enviar o evento, pois o command ja foi processado
     }
-    
-    var validator = new GenericValidator<>(projeto);
-    validator.assertValid(); // valida o domínio, em caso de erro, lanca uma DomainException
-    
-    projetoRepository.save(projeto);
-    
-    dispatcher.collectFrom(projeto);
-    dispatcher.emitAll();
 
     return ProjetoDTO.fromWithTarefas(projeto);
   }

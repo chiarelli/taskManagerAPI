@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 
 import com.github.chiarelli.taskmanager.domain.entity.AutorId;
@@ -22,15 +22,18 @@ import com.github.chiarelli.taskmanager.infra.springdata.mongodb.entity.Comentar
 import com.github.chiarelli.taskmanager.infra.springdata.mongodb.entity.HistoricoDocument;
 import com.github.chiarelli.taskmanager.infra.springdata.mongodb.mapper.HistoricoMapper;
 import com.github.chiarelli.taskmanager.infra.springdata.mongodb.repository.ComentarioMongoRepository;
-import com.github.chiarelli.taskmanager.spring_boot_run.TaskManagerSpringBootRunApplication;
 
-@SpringBootTest(classes = TaskManagerSpringBootRunApplication.class)
 @Import(TarefaMongoRepository.class)
 public class TarefaMongoRepositoryTest extends MongoTestContainer {
 
   @Autowired TarefaMongoRepository tarefaRepo;
 
   @Autowired ComentarioMongoRepository comentarioMongoRepo;
+
+  @AfterEach
+  void limparBanco() {
+    mongoTemplate.getDb().drop();
+  }
 
   @Test
   void devePersistirComentario() {

@@ -10,9 +10,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 
 import com.github.chiarelli.taskmanager.domain.entity.ProjetoId;
@@ -22,13 +22,16 @@ import com.github.chiarelli.taskmanager.domain.model.Tarefa;
 import com.github.chiarelli.taskmanager.domain.vo.DataVencimentoVO;
 import com.github.chiarelli.taskmanager.domain.vo.ePrioridadeVO;
 import com.github.chiarelli.taskmanager.domain.vo.eStatusTarefaVO;
-import com.github.chiarelli.taskmanager.spring_boot_run.TaskManagerSpringBootRunApplication;
 
-@SpringBootTest(classes = TaskManagerSpringBootRunApplication.class)
 @Import(ProjetoMongoRepository.class)
 public class ProjetoMongoRepositoryTest extends MongoTestContainer {
 
   @Autowired ProjetoMongoRepository projetoRepo;
+
+  @AfterEach
+  void limparBanco() {
+    mongoTemplate.getDb().drop();
+  }
 
   @Test
   void deveSalvarERecuperarProjeto() {

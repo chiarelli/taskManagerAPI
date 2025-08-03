@@ -1,0 +1,19 @@
+package com.github.chiarelli.taskmanager.application.handlers.logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import com.github.chiarelli.taskmanager.application.events.DomainEventAdapters.$$OriginEvent$$Adapter;
+import com.github.chiarelli.taskmanager.application.shared.EventHandler;
+
+@Component
+class $$OriginEvent$$sLogger implements EventHandler<$$OriginEvent$$Adapter> {
+
+  private static final Logger logger = LoggerFactory.getLogger($$OriginEvent$$sLogger.class);
+
+  @Override
+  public void handle($$OriginEvent$$Adapter event) {
+    logger.info("Mensagem %s mensagem".formatted(event.getAggregate().getIdAsString()));
+  }
+}

@@ -1,9 +1,11 @@
 package com.github.chiarelli.taskmanager.infra.springdata.mongodb.mapper;
 
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
+import com.github.chiarelli.taskmanager.application.dtos.HistoricoDTOWithAutorId;
 import com.github.chiarelli.taskmanager.domain.entity.AutorId;
 import com.github.chiarelli.taskmanager.domain.entity.HistoricoId;
 import com.github.chiarelli.taskmanager.domain.model.Historico;
@@ -29,6 +31,19 @@ public class HistoricoMapper {
     return new Historico(
       new HistoricoId(doc.getId()),
       doc.getDataOcorrencia(),
+      doc.getTitulo(),
+      doc.getDescricao(),
+      new AutorId(doc.getAutorId().toString())
+    );
+  }
+
+  public static HistoricoDTOWithAutorId toDTOWithAutorId(HistoricoDocument doc) {
+    return new HistoricoDTOWithAutorId(
+      new HistoricoId(doc.getId()),
+      doc.getDataOcorrencia()
+          .toInstant()
+          .atOffset(ZoneOffset.UTC)
+          .toLocalDateTime(),
       doc.getTitulo(),
       doc.getDescricao(),
       new AutorId(doc.getAutorId().toString())

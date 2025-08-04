@@ -35,6 +35,7 @@ public record AlterarDadosTarefaCommand(
   @NotNull
   ePrioridadeVO prioridade,
   
+  @NotNull
   @Min(value = 0, message = "A versão é obrigatória")
   Long version
 

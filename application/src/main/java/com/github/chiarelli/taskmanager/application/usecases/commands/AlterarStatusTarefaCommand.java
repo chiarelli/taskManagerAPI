@@ -20,6 +20,7 @@ public record AlterarStatusTarefaCommand(
   @NotNull
   eStatusTarefaVO status,
 
+  @NotNull
   @Min(value = 0, message = "A versão não pode ser negativa")
   Long version
   

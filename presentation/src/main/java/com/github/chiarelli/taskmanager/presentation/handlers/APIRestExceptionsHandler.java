@@ -14,6 +14,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
@@ -50,6 +51,12 @@ public class APIRestExceptionsHandler {
   public ResponseEntity<BadRequestResponse> handleNotFoundException(NotFoundException ex) {
     var badResp = new BadRequestResponse(Map.of("not_found", ex.getMessage()));
     return new ResponseEntity<>(badResp, HttpStatus.NOT_FOUND);
+  }
+
+  @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+  public ResponseEntity<BadRequestResponse> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex) {
+    var badResp = new BadRequestResponse(Map.of("request", "Parâmetros inválidos foram enviados na requisição."));
+    return new ResponseEntity<>(badResp, HttpStatus.BAD_REQUEST);
   }
 
   @ExceptionHandler(OptimisticLockingFailureException.class)

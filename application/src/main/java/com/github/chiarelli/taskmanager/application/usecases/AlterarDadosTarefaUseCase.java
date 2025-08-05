@@ -32,7 +32,7 @@ public class AlterarDadosTarefaUseCase implements CommandHandler<AlterarDadosTar
 
     var data = new AlterarDadosTarefa(command.projetoId(), command.tarefaId(), 
         command.titulo(), command.descricao(), command.dataVencimento(), 
-        command.prioridade(), command.version());
+        command.version());
 
     AutorId autorId = new AutorId(UUID.randomUUID().toString()); // TODO: pegar o autor logado
 

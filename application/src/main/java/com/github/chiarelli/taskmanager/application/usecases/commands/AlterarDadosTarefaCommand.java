@@ -7,7 +7,6 @@ import com.github.chiarelli.taskmanager.domain.entity.TarefaId;
 import com.github.chiarelli.taskmanager.domain.model.Tarefa;
 import com.github.chiarelli.taskmanager.domain.validation.GenericValidator;
 import com.github.chiarelli.taskmanager.domain.vo.DataVencimentoVO;
-import com.github.chiarelli.taskmanager.domain.vo.ePrioridadeVO;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -32,9 +31,6 @@ public record AlterarDadosTarefaCommand(
   @NotNull
   DataVencimentoVO dataVencimento,
 
-  @NotNull
-  ePrioridadeVO prioridade,
-  
   @NotNull
   @Min(value = 0, message = "A versão é obrigatória")
   Long version

@@ -87,7 +87,7 @@ public class TarefaTest {
     var novaDescricao = "Nova descrição";
 
     tarefa.alterarDados(projeto, tarefa.getTitulo(), novaDescricao, 
-        tarefa.getDataVencimento(), tarefa.getPrioridade(), historico);
+        tarefa.getDataVencimento(), historico);
 
     assertThat(tarefa.getDescricao()).isEqualTo(novaDescricao);
     assertThat(tarefa.getHistoricos()).contains(historico.getId());
@@ -98,7 +98,7 @@ public class TarefaTest {
   void naoDeveEmitirEventoSeDescricaoNaoMudar() {
     var ex = assertThrows(CommandAlreadyProcessedException.class, () -> {
       tarefa.alterarDados(projeto, tarefa.getTitulo(), "Descrição", 
-          tarefa.getDataVencimento(), tarefa.getPrioridade(), historico);
+          tarefa.getDataVencimento(), historico);
     });
 
     assertThat(ex.getMessage()).isEqualTo("Tarefa %s nao foi alterada.".formatted(tarefa.getId()));

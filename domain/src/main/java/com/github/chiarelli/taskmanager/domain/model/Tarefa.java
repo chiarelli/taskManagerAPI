@@ -86,17 +86,15 @@ public class Tarefa extends BaseModel {
     String novoTitulo,
     String novaDescricao,
     DataVencimentoVO novaDataVencimento,
-    ePrioridadeVO novoPrioridade,
     Historico historico) throws CommandAlreadyProcessedException {
 
     if (this.titulo.equals(novoTitulo) && this.descricao.equals(novaDescricao)
-        && this.dataVencimento.equals(novaDataVencimento) && this.prioridade.equals(novoPrioridade)) {
+        && this.dataVencimento.equals(novaDataVencimento)) {
       throw new CommandAlreadyProcessedException("Tarefa %s nao foi alterada.".formatted(this.id));
     }
     this.titulo = novoTitulo;
     this.descricao = novaDescricao;
     this.dataVencimento = novaDataVencimento;
-    this.prioridade = novoPrioridade;
 
     adicionarHistorico(projeto, historico);
 

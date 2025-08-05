@@ -74,7 +74,7 @@ public class TarefaService implements iTarefaService {
     );
 
     projeto.alterarDadosTarefa(tarefa.getId(), data.titulo(), data.descricao(), 
-        data.dataVencimento(), data.prioridade(), data.projetoVersao(), historico);
+        data.dataVencimento(), data.projetoVersao(), historico);
 
     projetoRepository.save(projeto);
     tarefaRepository.saveHistorico(tarefa.getId(), historico);

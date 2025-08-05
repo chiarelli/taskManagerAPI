@@ -552,7 +552,6 @@ public class TaskControllerTest extends MongoTestContainer {
         {
           "titulo": "Novo título",
           "descricao": "Nova descrição",
-          "prioridade": "ALTA",
           "data_vencimento": "%s",
           "version": 1
         }
@@ -566,7 +565,6 @@ public class TaskControllerTest extends MongoTestContainer {
         .andExpect(jsonPath("$.titulo").value("Novo título"))
         .andExpect(jsonPath("$.descricao").value("Nova descrição"))
         .andExpect(jsonPath("$.status").value("PENDENTE"))
-        .andExpect(jsonPath("$.prioridade").value("ALTA"))
         .andExpect(jsonPath("$.comentarios_qt").isNumber())
         .andExpect(jsonPath("$.data_vencimento").value(dataVencimentoFormatada));
   }
@@ -601,7 +599,6 @@ public class TaskControllerTest extends MongoTestContainer {
         {
           "titulo": "",
           "descricao": "",
-          "prioridade": null,
           "data_vencimento": null,
           "version": null
         }
@@ -612,9 +609,7 @@ public class TaskControllerTest extends MongoTestContainer {
         .content(payload))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.erros.titulo").value("O título deve ter entre 8 e 100 caracteres"))
-        .andExpect(jsonPath("$.erros.prioridade").value("A prioridade da tarefa deve ser informada"))
         .andExpect(jsonPath("$.erros.dataVencimento").value("A data de vencimento deve ser informada"));
-        // .andExpect(jsonPath("$.erros.version").exists());
   }
 
   @Test

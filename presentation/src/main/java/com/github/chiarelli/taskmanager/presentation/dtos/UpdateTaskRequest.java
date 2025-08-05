@@ -3,7 +3,6 @@ package com.github.chiarelli.taskmanager.presentation.dtos;
 import java.time.OffsetDateTime;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.github.chiarelli.taskmanager.domain.vo.ePrioridadeVO;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -20,9 +19,6 @@ public record UpdateTaskRequest(
   @JsonProperty("data_vencimento")
   @NotNull(message = "A data de vencimento deve ser informada")
   OffsetDateTime dataVencimento,
-
-  @NotNull(message = "A prioridade da tarefa deve ser informada")
-  ePrioridadeVO prioridade,
 
   @Min(value = 0, message = "A versão é obrigatória")
   Long version

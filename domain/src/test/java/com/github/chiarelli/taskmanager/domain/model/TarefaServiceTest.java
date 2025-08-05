@@ -132,7 +132,7 @@ public class TarefaServiceTest {
 
     var data = new AlterarDadosTarefa(projeto.getId(), tarefa.getId(), 
       tarefa.getTitulo(), novaDescricao, tarefa.getDataVencimento(), 
-      tarefa.getPrioridade(), 1L);
+       1L);
 
     List<AbstractDomainEvent<?>> events = tarefaService.alterarDadosComHistorico(data, autor).flushEvents();
 

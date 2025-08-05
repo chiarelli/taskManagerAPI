@@ -102,7 +102,6 @@ public class TaskController {
       request.titulo(), 
       request.descricao(),
       DataVencimentoVO.of(request.dataVencimento()),
-      request.prioridade(),
       request.version()
     ));
 

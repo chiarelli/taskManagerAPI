@@ -215,12 +215,13 @@ class AlterarDadosTarefaUseCaseTest {
       commandInvalido.validate();
     });
 
-    assertEquals(5, ex.getViolations().size());
+    assertEquals(6, ex.getViolations().size());
     assertThat(ex.getViolations().get("projetoId")).isEqualTo("não deve ser nulo");
     assertThat(ex.getViolations().get("tarefaId")).isEqualTo("não deve ser nulo");
     assertThat(ex.getViolations().get("titulo")).isEqualTo("O título deve ter entre 8 e 100 caracteres");
     assertThat(ex.getViolations().get("dataVencimento")).isEqualTo("não deve ser nulo");
     assertThat(ex.getViolations().get("prioridade")).isEqualTo("não deve ser nulo");
+    assertThat(ex.getViolations().get("version")).isEqualTo("não deve ser nulo");
   }
 
   @Test

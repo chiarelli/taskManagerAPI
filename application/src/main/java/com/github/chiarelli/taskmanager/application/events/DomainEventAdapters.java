@@ -8,6 +8,7 @@ import com.github.chiarelli.taskmanager.application.shared.Event;
 import com.github.chiarelli.taskmanager.domain.entity.ProjetoId;
 import com.github.chiarelli.taskmanager.domain.entity.TarefaId;
 import com.github.chiarelli.taskmanager.domain.event.*;
+import com.github.chiarelli.taskmanager.domain.model.Comentario;
 import com.github.chiarelli.taskmanager.domain.model.Projeto;
 import com.github.chiarelli.taskmanager.domain.model.iDefaultAggregate;
 
@@ -43,6 +44,12 @@ public class DomainEventAdapters {
     public StatusTarefaAlteradoEventAdapter(iDefaultAggregate aggregate, Payload payload) {
       super((Projeto) aggregate, payload);
     }    
+  }
+
+  public static class ComentarioCriadoEventAdapter extends ComentarioCriadoEvent implements Event {
+    public ComentarioCriadoEventAdapter(iDefaultAggregate aggregate, Payload payload) {
+      super((Comentario) aggregate, payload);
+    }
   }
 
   public static class ComentarioAdicionadoEventAdapter extends ComentarioAdicionadoEvent implements Event {

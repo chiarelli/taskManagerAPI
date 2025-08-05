@@ -4,24 +4,24 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.github.chiarelli.taskmanager.domain.entity.ComentarioId;
+import com.github.chiarelli.taskmanager.domain.entity.HistoricoId;
 import com.github.chiarelli.taskmanager.domain.entity.TarefaId;
 import com.github.chiarelli.taskmanager.domain.model.Tarefa;
 import com.github.chiarelli.taskmanager.domain.vo.DataVencimentoVO;
 import com.github.chiarelli.taskmanager.domain.vo.ePrioridadeVO;
 import com.github.chiarelli.taskmanager.domain.vo.eStatusTarefaVO;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Getter
-@Setter
+@Data
+@EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
 public class TarefaDTO {
 
+  @EqualsAndHashCode.Include
   private TarefaId id;
+  
   private String titulo;
   private String descricao;
   private DataVencimentoVO dataVencimento;
@@ -29,14 +29,14 @@ public class TarefaDTO {
   private ePrioridadeVO prioridade;
   private Long version = 0L;
 
-  List<ComentarioDTO> comentarios = new ArrayList<>();
-  List<HistoricoDTO> historicos = new ArrayList<>();
+  List<ComentarioId> comentarios = new ArrayList<>();
+  List<HistoricoId> historicos = new ArrayList<>();
 
-  public List<ComentarioDTO> getComentarios() {
+  public List<ComentarioId> getComentarios() {
     return Collections.unmodifiableList(comentarios);
   }
 
-  public List<HistoricoDTO> getHistoricos() {
+  public List<HistoricoId> getHistoricos() {
     return Collections.unmodifiableList(historicos);
   }
 

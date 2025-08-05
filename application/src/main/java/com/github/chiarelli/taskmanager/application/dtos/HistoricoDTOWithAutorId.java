@@ -7,14 +7,16 @@ import com.github.chiarelli.taskmanager.domain.entity.AutorId;
 import com.github.chiarelli.taskmanager.domain.entity.HistoricoId;
 import com.github.chiarelli.taskmanager.domain.model.Historico;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-@RequiredArgsConstructor
-@Getter
+@Data
+@EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
 public class HistoricoDTOWithAutorId {
 
+  @EqualsAndHashCode.Include
   private final HistoricoId id;
+  
   private final LocalDateTime dataOcorrencia;
   private final String titulo;
   private final String descricao;  

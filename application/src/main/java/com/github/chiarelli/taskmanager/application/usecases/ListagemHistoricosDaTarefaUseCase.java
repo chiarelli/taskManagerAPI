@@ -36,7 +36,7 @@ public class ListagemHistoricosDaTarefaUseCase implements QueryHandler<ListagemH
     );
 
     Page<HistoricoDTOWithAutorId> result = repository.findAllHistoricosByTarefaId(query.tarefaId(), comOrdenacao);    
-    AutorDTO autor = new AutorDTO(new AutorId(UUID.randomUUID().toString()), "Fake name"); // TODO: buscar autor real logado
+    AutorDTO autor = new AutorDTO(new AutorId(UUID.randomUUID().toString()), "Fake name"); // TODO: pegar o autor logado
     
     return result.map(h -> HistoricoDTOWithAutorId.from(h, autor));
   }

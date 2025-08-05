@@ -7,11 +7,14 @@ import com.github.chiarelli.taskmanager.domain.entity.ProjetoId;
 import com.github.chiarelli.taskmanager.domain.model.Projeto;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
+@EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
 public class ProjetoDTO {
-
+  @EqualsAndHashCode.Include
   private ProjetoId id;
+  
   private String titulo;
   private String descricao;
   private Long version = 0L;

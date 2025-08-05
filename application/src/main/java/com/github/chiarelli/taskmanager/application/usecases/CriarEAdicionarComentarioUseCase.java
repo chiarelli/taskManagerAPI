@@ -30,7 +30,7 @@ public class CriarEAdicionarComentarioUseCase implements CommandHandler<CriarEAd
     dispatcher.collectFrom(result);
     dispatcher.emitAll();
 
-    var autor = new AutorDTO(command.autor(), "Fake name"); // TODO: buscar autor real logado
+    var autor = new AutorDTO(command.autor(), "Fake name"); // TODO: pegar o autor logado
 
     return ComentarioDTO.from(result.result(), autor);    
   }

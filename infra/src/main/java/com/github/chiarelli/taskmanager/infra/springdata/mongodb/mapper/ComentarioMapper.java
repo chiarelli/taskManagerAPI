@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
+import com.github.chiarelli.taskmanager.application.dtos.ComentarioDTOWithAuthorId;
 import com.github.chiarelli.taskmanager.domain.entity.AutorId;
 import com.github.chiarelli.taskmanager.domain.entity.ComentarioId;
 import com.github.chiarelli.taskmanager.domain.entity.TarefaId;
@@ -41,4 +42,8 @@ public class ComentarioMapper {
     return doc;
   }
 
+  public static ComentarioDTOWithAuthorId toDTOWithAuthorId(ComentarioDocument doc) {
+    return new ComentarioDTOWithAuthorId(new ComentarioId(doc.getId()), doc.getDataOcorrencia(), 
+        doc.getTitulo(), doc.getDescricao(), new AutorId(doc.getAutorId().toString()));
+  }
 }

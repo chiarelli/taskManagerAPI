@@ -6,12 +6,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
+import com.github.chiarelli.taskmanager.application.dtos.ComentarioDTOWithAuthorId;
 import com.github.chiarelli.taskmanager.application.dtos.HistoricoDTOWithAutorId;
 import com.github.chiarelli.taskmanager.application.repository.ITarefaReaderRepository;
 import com.github.chiarelli.taskmanager.domain.entity.ComentarioId;
 import com.github.chiarelli.taskmanager.domain.entity.HistoricoId;
 import com.github.chiarelli.taskmanager.domain.entity.TarefaId;
+import com.github.chiarelli.taskmanager.infra.springdata.mongodb.entity.ComentarioDocument;
 import com.github.chiarelli.taskmanager.infra.springdata.mongodb.entity.HistoricoDocument;
+import com.github.chiarelli.taskmanager.infra.springdata.mongodb.mapper.ComentarioMapper;
 import com.github.chiarelli.taskmanager.infra.springdata.mongodb.mapper.HistoricoMapper;
 import com.github.chiarelli.taskmanager.infra.springdata.mongodb.mapper.IdProjection;
 import com.github.chiarelli.taskmanager.infra.springdata.mongodb.repository.ComentarioMongoRepository;
@@ -49,6 +52,13 @@ public class TarefaMongoReaderRepository implements ITarefaReaderRepository {
         .map(IdProjection::getId)
         .map(ComentarioId::new)
         .toList();
+  }
+
+  @Override
+  public Page<ComentarioDTOWithAuthorId> findAllComentariosByTarefaId(TarefaId tarefaId, Pageable pageable) {
+    Page<ComentarioDocument> result = comentarioMongoRepository.findAllByTarefaId(tarefaId.getId(), pageable);
+
+    return result.map(ComentarioMapper::toDTOWithAuthorId);
   }
 
 }

@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.github.chiarelli.taskmanager.application.dtos.TarefaDTO;
 import com.github.chiarelli.taskmanager.application.exceptions.NotFoundException;
+import com.github.chiarelli.taskmanager.application.repository.ITarefaReaderRepository;
 import com.github.chiarelli.taskmanager.application.usecases.queries.BuscarTarefaPorIdQuery;
 import com.github.chiarelli.taskmanager.domain.entity.ProjetoId;
 import com.github.chiarelli.taskmanager.domain.entity.TarefaId;
@@ -35,6 +36,9 @@ public class BuscarTarefaPorIdUseCaseTest {
   @Mock
   private iProjetoRepository projetoRepository;
 
+  @Mock
+  private ITarefaReaderRepository tarefaReaderRepository;
+  
   @InjectMocks
   private BuscarTarefaPorIdUseCase useCase;
 

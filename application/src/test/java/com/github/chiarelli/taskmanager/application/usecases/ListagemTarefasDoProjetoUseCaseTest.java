@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.github.chiarelli.taskmanager.application.dtos.TarefaDTO;
 import com.github.chiarelli.taskmanager.application.exceptions.NotFoundException;
+import com.github.chiarelli.taskmanager.application.repository.ITarefaReaderRepository;
 import com.github.chiarelli.taskmanager.application.usecases.queries.ListagemTarefasDoProjetoQuery;
 import com.github.chiarelli.taskmanager.domain.entity.ProjetoId;
 import com.github.chiarelli.taskmanager.domain.entity.TarefaId;
@@ -33,6 +34,9 @@ public class ListagemTarefasDoProjetoUseCaseTest {
 
   @Mock
   private iProjetoRepository projetoRepository;
+
+  @Mock
+  private ITarefaReaderRepository tarefaReaderRepository;
 
   @InjectMocks
   private ListagemTarefasDoProjetoUseCase useCase;

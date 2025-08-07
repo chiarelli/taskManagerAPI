@@ -9,6 +9,7 @@ import com.github.chiarelli.taskmanager.domain.entity.ComentarioId;
 import com.github.chiarelli.taskmanager.domain.entity.HistoricoId;
 import com.github.chiarelli.taskmanager.domain.entity.TarefaId;
 import com.github.chiarelli.taskmanager.domain.event.ComentarioAdicionadoEvent;
+import com.github.chiarelli.taskmanager.domain.event.ComentarioExcluidoEvent;
 import com.github.chiarelli.taskmanager.domain.event.HistoricoAdicionadoEvent;
 import com.github.chiarelli.taskmanager.domain.event.StatusTarefaAlteradoEvent;
 import com.github.chiarelli.taskmanager.domain.event.TarefaAlteradaEvent;
@@ -152,6 +153,14 @@ public class Tarefa extends BaseModel {
   
   public Set<HistoricoId> getHistoricos() {
     return Collections.unmodifiableSet(historicos);
+  }
+
+  public void removerComentario(Projeto projeto, ComentarioId comentarioId) {
+    // if(!comentarios.remove(comentarioId)) {
+    //   throw new DomainException("Comentario %s nao pertence à tarefa %s".formatted(comentarioId, this.id));
+    // }
+
+    this.addEvent(new ComentarioExcluidoEvent(projeto, comentarioId));
   }
 
 }

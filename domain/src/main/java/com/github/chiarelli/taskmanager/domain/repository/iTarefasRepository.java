@@ -19,5 +19,7 @@ public interface iTarefasRepository {
   void saveHistorico(TarefaId tarefaId, Historico historico);
 
   void saveComentario(TarefaId tarefaId, Comentario comentario);
+
+  void deleteComentario(TarefaId tarefaId, ComentarioId comentarioId);
   
 }

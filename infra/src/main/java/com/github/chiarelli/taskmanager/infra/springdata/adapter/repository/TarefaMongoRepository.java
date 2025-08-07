@@ -59,4 +59,9 @@ public class TarefaMongoRepository implements iTarefasRepository {
     comentarioRepo.save(doc);
   }
 
+  @Override
+  public void deleteComentario(TarefaId tarefaId, ComentarioId comentarioId) {
+    comentarioRepo.deleteByIdAndTarefaId(comentarioId.getId(), tarefaId.getId());
+  }
+
 }

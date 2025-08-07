@@ -24,5 +24,7 @@ public interface ComentarioMongoRepository extends MongoRepository<ComentarioDoc
 
   @Query(value = "{ 'tarefaId': ?0 }", fields = "{ '_id' : 1 }")
   List<IdProjection> findOnlyIdsByTarefaId(UUID tarefaId);
+
+  void deleteByIdAndTarefaId(UUID comentarioId, UUID tarefaId);
   
 }

@@ -7,6 +7,7 @@ import com.github.chiarelli.taskmanager.domain.dto.CriarComentario;
 import com.github.chiarelli.taskmanager.domain.dto.ExcluirTarefa;
 import com.github.chiarelli.taskmanager.domain.dto.ServiceResult;
 import com.github.chiarelli.taskmanager.domain.entity.AutorId;
+import com.github.chiarelli.taskmanager.domain.entity.ComentarioId;
 import com.github.chiarelli.taskmanager.domain.entity.ProjetoId;
 import com.github.chiarelli.taskmanager.domain.entity.TarefaId;
 import com.github.chiarelli.taskmanager.domain.model.Comentario;
@@ -23,5 +24,7 @@ public interface iTarefaService {
   ServiceResult<Comentario> alterarComentarioComHistorico(ProjetoId projetoId, TarefaId tarefaId, AlterarComentario data);
 
   ServiceResult<Void> excluirTarefaComHistorico(ExcluirTarefa data, AutorId autor);
+
+  ServiceResult<Void> excluirComentarioComHistorico(ProjetoId projetoId, TarefaId tarefaId, ComentarioId comentarioId);
 
 }

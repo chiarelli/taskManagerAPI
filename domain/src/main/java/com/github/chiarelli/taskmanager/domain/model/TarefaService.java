@@ -11,6 +11,7 @@ import com.github.chiarelli.taskmanager.domain.dto.CriarComentario;
 import com.github.chiarelli.taskmanager.domain.dto.ExcluirTarefa;
 import com.github.chiarelli.taskmanager.domain.dto.ServiceResult;
 import com.github.chiarelli.taskmanager.domain.entity.AutorId;
+import com.github.chiarelli.taskmanager.domain.entity.ComentarioId;
 import com.github.chiarelli.taskmanager.domain.entity.HistoricoId;
 import com.github.chiarelli.taskmanager.domain.entity.ProjetoId;
 import com.github.chiarelli.taskmanager.domain.entity.TarefaId;
@@ -172,6 +173,44 @@ public class TarefaService implements iTarefaService {
 
     eventBuffer.collectFrom(projeto);
     eventBuffer.collectFrom(tarefa);
+
+    var payload = new HistoricoAdicionadoEvent.Payload(tarefa.getId(), historico.getId(),
+        historico.getDataOcorrencia(), historico.getTitulo(), 
+        historico.getDescricao(), historico.getAutor());
+    
+    var events = new ArrayList<>(eventBuffer.flushEvents());
+
+    events.add(new HistoricoAdicionadoEvent(projeto, payload)); // Adiciona o evento de histórico
+
+    return new ServiceResult<>(null, events);
+  }
+
+  @Override
+  public ServiceResult<Void> excluirComentarioComHistorico(ProjetoId projetoId, TarefaId tarefaId, ComentarioId comentarioId) {
+    var resp = loadTarefaByProjetoIdAndTarefaId(projetoId, tarefaId);
+
+    Tarefa tarefa = resp.tarefa();
+    Projeto projeto = resp.projeto();
+
+    Comentario comentario = tarefaRepository.findComentarioByComentarioIdAndTarefaId(tarefa.getId(), comentarioId)
+        .orElseThrow(() -> new DomainException("Comentario %s nao pertence à tarefa %s".formatted(comentarioId, tarefaId)));
+
+    var historico = new Historico(
+      new HistoricoId(),
+      new Date(),
+      "Exclusão de Comentario",
+      "Excluido o comentario: " + comentario.getDescricao(),
+      comentario.getAutor()
+    );
+
+    tarefa.removerComentario(projeto, comentarioId);
+
+    tarefaRepository.deleteComentario(tarefa.getId(), comentarioId);
+    tarefaRepository.saveHistorico(tarefa.getId(), historico);
+
+    eventBuffer.collectFrom(projeto);
+    eventBuffer.collectFrom(tarefa);
+    eventBuffer.collectFrom(comentario);
 
     var payload = new HistoricoAdicionadoEvent.Payload(tarefa.getId(), historico.getId(),
         historico.getDataOcorrencia(), historico.getTitulo(), 

@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.github.chiarelli.taskmanager.application.shared.Event;
+import com.github.chiarelli.taskmanager.domain.entity.ComentarioId;
 import com.github.chiarelli.taskmanager.domain.entity.ProjetoId;
 import com.github.chiarelli.taskmanager.domain.entity.TarefaId;
 import com.github.chiarelli.taskmanager.domain.event.*;
@@ -56,6 +57,18 @@ public class DomainEventAdapters {
     public ComentarioAdicionadoEventAdapter(iDefaultAggregate aggregate,Payload payload) {
       super(aggregate, payload);
     }    
+  }
+
+  public static class ComentarioAlteradoEventAdapter extends ComentarioAlteradoEvent implements Event {
+    public ComentarioAlteradoEventAdapter(iDefaultAggregate aggregate, Payload payload) {
+      super((Comentario) aggregate, payload);
+    }
+  }
+
+  public static class ComentarioExcluidoEventAdapter extends ComentarioExcluidoEvent implements Event {
+    public ComentarioExcluidoEventAdapter(iDefaultAggregate aggregate, ComentarioId comentarioId) {
+      super((Projeto) aggregate, comentarioId);
+    }
   }
 
   public static class ProjetoCriadoEventAdapter extends ProjetoCriadoEvent implements Event {

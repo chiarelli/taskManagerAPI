@@ -1,7 +1,5 @@
 package com.github.chiarelli.taskmanager.application.usecases;
 
-import java.util.UUID;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -14,7 +12,6 @@ import com.github.chiarelli.taskmanager.application.dtos.HistoricoDTOWithAutorId
 import com.github.chiarelli.taskmanager.application.repository.ITarefaReaderRepository;
 import com.github.chiarelli.taskmanager.application.shared.QueryHandler;
 import com.github.chiarelli.taskmanager.application.usecases.queries.ListagemHistoricosDaTarefaQuery;
-import com.github.chiarelli.taskmanager.domain.entity.AutorId;
 
 import lombok.RequiredArgsConstructor;
 
@@ -36,9 +33,11 @@ public class ListagemHistoricosDaTarefaUseCase implements QueryHandler<ListagemH
     );
 
     Page<HistoricoDTOWithAutorId> result = repository.findAllHistoricosByTarefaId(query.tarefaId(), comOrdenacao);    
-    AutorDTO autor = new AutorDTO(new AutorId(UUID.randomUUID().toString()), "Fake name"); // TODO: pegar o autor logado
     
-    return result.map(h -> HistoricoDTOWithAutorId.from(h, autor));
+    return result.map(h -> { 
+      AutorDTO autor = new AutorDTO(h.getAutorId(), "Fake name"); // TODO: pegar o autor logado
+      return HistoricoDTOWithAutorId.from(h, autor);
+    });
   }
 
 }

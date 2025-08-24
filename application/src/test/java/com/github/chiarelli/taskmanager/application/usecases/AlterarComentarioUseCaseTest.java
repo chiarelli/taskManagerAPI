@@ -7,7 +7,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -91,7 +90,7 @@ public class AlterarComentarioUseCaseTest {
     Projeto projeto = Projeto.criarNovoProjeto(new CriarProjeto("Projeto Titulo", "Descrição Projeto"));
     when(projetoRepository.findById(projetoId)).thenReturn(Optional.of(projeto));
 
-    Tarefa tarefa = new Tarefa(tarefaId, "Titulo antigo", "Descrição antiga", DataVencimentoVO.now(), eStatusTarefaVO.PENDENTE, ePrioridadeVO.BAIXA, new HashSet<>(), new HashSet<>());
+    Tarefa tarefa = new Tarefa(tarefaId, "Titulo antigo", "Descrição antiga", DataVencimentoVO.now(), eStatusTarefaVO.PENDENTE, ePrioridadeVO.BAIXA);
 
     projeto.adicionarTarefa(tarefa);
 

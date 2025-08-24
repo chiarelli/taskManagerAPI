@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -57,7 +56,7 @@ public class BuscarTarefaPorIdUseCaseTest {
     BuscarTarefaPorIdQuery query = new BuscarTarefaPorIdQuery(projetoId, tarefaId);
 
     Tarefa tarefa = new Tarefa(tarefaId, "Título de Teste", "Descrição de Teste", DataVencimentoVO.now(), 
-        eStatusTarefaVO.EM_ANDAMENTO, ePrioridadeVO.BAIXA, Set.of(), Set.of());
+        eStatusTarefaVO.EM_ANDAMENTO, ePrioridadeVO.BAIXA);
 
     when(projetoRepository.existsById(projetoId)).thenReturn(true);
     when(projetoRepository.findTarefaByProjetoId(projetoId, tarefaId)).thenReturn(Optional.of(tarefa));

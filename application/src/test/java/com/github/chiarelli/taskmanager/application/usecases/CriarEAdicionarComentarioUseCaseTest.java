@@ -76,7 +76,7 @@ public class CriarEAdicionarComentarioUseCaseTest {
     tarefasService = new TarefaService(tarefaRepository, projetoRepository, eventBuffer);
     useCase = new CriarEAdicionarComentarioUseCase(dispatcher, tarefasService);
 
-    tarefa = new Tarefa(new TarefaId(), "Title", "Description", DataVencimentoVO.of(OffsetDateTime.now().plusDays(1)), eStatusTarefaVO.PENDENTE, ePrioridadeVO.BAIXA, new HashSet<>(), new HashSet<>());
+    tarefa = new Tarefa(new TarefaId(), "Title", "Description", DataVencimentoVO.of(OffsetDateTime.now().plusDays(1)), eStatusTarefaVO.PENDENTE, ePrioridadeVO.BAIXA);
     
     var tarefas = new HashSet<Tarefa>();
         tarefas.add(tarefa);

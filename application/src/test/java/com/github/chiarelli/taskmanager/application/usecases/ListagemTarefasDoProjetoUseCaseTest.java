@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -52,10 +51,10 @@ public class ListagemTarefasDoProjetoUseCaseTest {
   void deveRetornarListaDeTarefaDTO_quandoProjetoExiste() {
     // Arrange
     Tarefa tarefa1 = new Tarefa(new TarefaId(UUID.randomUUID()), "Tarefa 1", "Desc 1", DataVencimentoVO.now(),
-        eStatusTarefaVO.PENDENTE, ePrioridadeVO.ALTA, Set.of(), Set.of());
+        eStatusTarefaVO.PENDENTE, ePrioridadeVO.ALTA);
 
     Tarefa tarefa2 = new Tarefa(new TarefaId(UUID.randomUUID()), "Tarefa 2", "Desc 2", DataVencimentoVO.now(),
-        eStatusTarefaVO.CONCLUIDA, ePrioridadeVO.BAIXA, Set.of(), Set.of());
+        eStatusTarefaVO.CONCLUIDA, ePrioridadeVO.BAIXA);
 
     ListagemTarefasDoProjetoQuery query = new ListagemTarefasDoProjetoQuery(projetoId);
 

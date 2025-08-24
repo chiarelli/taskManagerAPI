@@ -81,7 +81,7 @@ public class AlterarStatusTarefaUseCaseTest {
     projetoId = new ProjetoId(UUID.randomUUID());
     tarefaId = new TarefaId(UUID.randomUUID());
     tarefa = new Tarefa(tarefaId, "Tarefa Exemplo", "Descrição", DataVencimentoVO.now(), 
-        eStatusTarefaVO.EM_ANDAMENTO, ePrioridadeVO.BAIXA, new HashSet<>(), new HashSet<>());
+        eStatusTarefaVO.EM_ANDAMENTO, ePrioridadeVO.BAIXA);
   }
 
   @Test

@@ -80,9 +80,7 @@ public class TarefaServiceTest {
       "Descrição",
       DataVencimentoVO.of(OffsetDateTime.now().plusDays(1)),
       eStatusTarefaVO.PENDENTE,
-      ePrioridadeVO.BAIXA,
-      new HashSet<>(),
-      new HashSet<>()
+      ePrioridadeVO.BAIXA
     );
 
     tarefaService = new TarefaService(tarefaRepository, projetoRepository, eventBuffer);

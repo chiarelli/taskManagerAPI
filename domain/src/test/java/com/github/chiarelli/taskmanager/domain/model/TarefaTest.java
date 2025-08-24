@@ -10,7 +10,6 @@ import static org.mockito.Mockito.mock;
 
 import java.time.OffsetDateTime;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -46,9 +45,7 @@ public class TarefaTest {
       "Descrição",
       DataVencimentoVO.of(OffsetDateTime.now().plusDays(1)),
       eStatusTarefaVO.PENDENTE,
-      ePrioridadeVO.BAIXA,
-      new HashSet<>(),
-      new HashSet<>()
+      ePrioridadeVO.BAIXA
     );
 
     historico = new Historico(
@@ -80,6 +77,45 @@ public class TarefaTest {
     assertThatThrownBy(() -> tarefa.alterarStatus(projeto, eStatusTarefaVO.PENDENTE, historico))
         .isInstanceOf(DomainException.class)
         .hasMessageContaining("Status já se encontra");
+  }
+
+  @Test
+  void naoDevePermitirAlterarStatusSeTarefaJaEstiverConcluida() {
+    // Primeiro concluímos a tarefa
+    tarefa.alterarStatus(projeto, eStatusTarefaVO.CONCLUIDA, historico);
+
+    // Agora tentamos alterar novamente o status
+    Historico novoHistorico = new Historico(
+        new HistoricoId(),
+        new Date(),
+        "Tentativa de alteração",
+        "Alterado de CONCLUIDA para EM_ANDAMENTO",
+        new AutorId("456"));
+
+    assertThatThrownBy(() -> tarefa.alterarStatus(projeto, eStatusTarefaVO.EM_ANDAMENTO, novoHistorico))
+        .isInstanceOf(DomainException.class)
+        .hasMessageContaining("Tarefa concluida nao pode ser alterada.");
+  }
+
+  @Test
+  void deveCriarObjetoConcluidaPorAoConcluirTarefa() {
+    AutorId autor = new AutorId("789");
+    Date dataConclusao = new Date();
+    Historico historicoConclusao = new Historico(
+        new HistoricoId(),
+        dataConclusao,
+        "Conclusão da Tarefa",
+        "Alterado de PENDENTE para CONCLUIDA",
+        autor);
+
+    tarefa.alterarStatus(projeto, eStatusTarefaVO.CONCLUIDA, historicoConclusao);
+
+    assertThat(tarefa.getStatus()).isEqualTo(eStatusTarefaVO.CONCLUIDA);
+    assertThat(tarefa.getConcluidaPor()).isPresent();
+
+    var concluidaPor = tarefa.getConcluidaPor().get();
+    assertThat(concluidaPor.getAutorId()).isEqualTo(autor);
+    assertThat(concluidaPor.getDataConclusao()).isEqualTo(dataConclusao);
   }
 
   @Test

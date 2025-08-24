@@ -68,9 +68,7 @@ public class ExcluirTarefaUseCaseTest {
         "Descrição",
         DataVencimentoVO.now(),
         eStatusTarefaVO.CONCLUIDA,
-        ePrioridadeVO.ALTA,
-        new HashSet<>(),
-        new HashSet<>()
+        ePrioridadeVO.ALTA
     );
 
     projeto = new Projeto(projetoId, "Projeto X", "Descrição", 0L, new HashSet<>(List.of(tarefa)));

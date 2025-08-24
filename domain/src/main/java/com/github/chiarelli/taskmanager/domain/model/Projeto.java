@@ -148,9 +148,7 @@ public class Projeto extends BaseModel implements iDefaultAggregate {
       data.descricao(),
       data.dataVencimento(),
       data.status(),
-      data.prioridade(),
-      new HashSet<>(),
-      new HashSet<>()
+      data.prioridade()
     );
 
     var payload = new NovaTarefaCriadaEvent.Payload(

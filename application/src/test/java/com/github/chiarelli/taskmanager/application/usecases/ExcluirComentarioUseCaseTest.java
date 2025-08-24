@@ -10,7 +10,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -98,9 +97,7 @@ public class ExcluirComentarioUseCaseTest {
         "Descrição Tarefa",
         DataVencimentoVO.now(),
         eStatusTarefaVO.PENDENTE,
-        ePrioridadeVO.MEDIA,
-        new HashSet<>(),
-        new HashSet<>()
+        ePrioridadeVO.MEDIA
     );
     projeto.adicionarTarefa(tarefa);
 
@@ -155,9 +152,7 @@ public class ExcluirComentarioUseCaseTest {
         "Descrição Tarefa",
         DataVencimentoVO.now(),
         eStatusTarefaVO.PENDENTE,
-        ePrioridadeVO.MEDIA,
-        new HashSet<>(),
-        new HashSet<>()
+        ePrioridadeVO.MEDIA
     );
     projeto.adicionarTarefa(tarefa);
 

@@ -93,9 +93,7 @@ class AlterarDadosTarefaUseCaseTest {
       "Descrição original",
       DataVencimentoVO.now(),
       eStatusTarefaVO.PENDENTE,
-      ePrioridadeVO.MEDIA,
-      new HashSet<>(),
-      new HashSet<>()
+      ePrioridadeVO.MEDIA
     );
 
     projeto = new Projeto(projetoId, "Projeto Exemplo", "Desc", 0L, 

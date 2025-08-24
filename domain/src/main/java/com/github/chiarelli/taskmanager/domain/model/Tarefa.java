@@ -2,6 +2,7 @@ package com.github.chiarelli.taskmanager.domain.model;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import com.github.chiarelli.taskmanager.domain.dto.CriarTarefa;
@@ -17,6 +18,7 @@ import com.github.chiarelli.taskmanager.domain.event.TarefaExcluidaEvent;
 import com.github.chiarelli.taskmanager.domain.exception.CommandAlreadyProcessedException;
 import com.github.chiarelli.taskmanager.domain.exception.DomainException;
 import com.github.chiarelli.taskmanager.domain.vo.DataVencimentoVO;
+import com.github.chiarelli.taskmanager.domain.vo.TarefaConcluidaPorVO;
 import com.github.chiarelli.taskmanager.domain.vo.ePrioridadeVO;
 import com.github.chiarelli.taskmanager.domain.vo.eStatusTarefaVO;
 
@@ -53,12 +55,36 @@ public class Tarefa extends BaseModel {
 
   @NotNull
   private eStatusTarefaVO status;
+  
+  private TarefaConcluidaPorVO concluidaPor;
 
   @NotNull
   private ePrioridadeVO prioridade;
 
   private Set<ComentarioId> comentarios = new HashSet<>();
   private Set<HistoricoId> historicos = new HashSet<>();
+
+  public Tarefa(TarefaId id, String titulo, String descricao, DataVencimentoVO dataVencimento,
+      eStatusTarefaVO status, ePrioridadeVO prioridade) {
+    this.id = id;
+    this.titulo = titulo;
+    this.descricao = descricao;
+    this.dataVencimento = dataVencimento;
+    this.status = status;
+    this.prioridade = prioridade;
+  }
+
+  public Tarefa(TarefaId id, String titulo, String descricao, DataVencimentoVO dataVencimento,
+      eStatusTarefaVO status, ePrioridadeVO prioridade, Set<ComentarioId> comentarios, Set<HistoricoId> historicos) {
+    this.id = id;
+    this.titulo = titulo;
+    this.descricao = descricao;
+    this.dataVencimento = dataVencimento;
+    this.status = status;
+    this.prioridade = prioridade;
+    comentarios.forEach(this.comentarios::add);
+    historicos.forEach(this.historicos::add);
+  }
 
   public Tarefa(String titulo, String descricao, DataVencimentoVO dataVencimento,
       eStatusTarefaVO status, ePrioridadeVO prioridade) {
@@ -71,11 +97,19 @@ public class Tarefa extends BaseModel {
 
   // Métodos de negócio
   void alterarStatus(Projeto projeto, eStatusTarefaVO novoStatus, Historico historico) {
+    if(eStatusTarefaVO.CONCLUIDA.equals(this.status)) {
+      throw new DomainException("Tarefa concluida nao pode ser alterada.");
+    }
     if (this.status == novoStatus) {
       throw new DomainException("Status já se encontra como '" + novoStatus + "'");
     }
     eStatusTarefaVO antigoStatus = this.status;
     this.status = novoStatus;
+
+    if(eStatusTarefaVO.CONCLUIDA.equals(this.status)) {
+      this.concluidaPor = new TarefaConcluidaPorVO(historico.getAutor(), historico.getDataOcorrencia());
+    }
+
     adicionarHistorico(projeto, historico);
 
     var payload = new StatusTarefaAlteradoEvent.Payload(this.id, this.status, antigoStatus);
@@ -161,6 +195,10 @@ public class Tarefa extends BaseModel {
     // }
 
     this.addEvent(new ComentarioExcluidoEvent(projeto, comentarioId));
+  }
+
+  public Optional<TarefaConcluidaPorVO> getConcluidaPor() {
+    return Optional.ofNullable(concluidaPor);
   }
 
 }

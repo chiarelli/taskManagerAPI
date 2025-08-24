@@ -44,9 +44,7 @@ public class ProjetoTest {
         "Descrição",
         DataVencimentoVO.of(OffsetDateTime.now().plusDays(1)),
         eStatusTarefaVO.PENDENTE,
-        ePrioridadeVO.MEDIA,
-        new HashSet<>(),
-        new HashSet<>()
+        ePrioridadeVO.MEDIA
     );
 
     projeto.adicionarTarefa(tarefaPendente);
@@ -67,9 +65,7 @@ public class ProjetoTest {
         "Descrição",
         DataVencimentoVO.of(OffsetDateTime.now().plusDays(1)),
         eStatusTarefaVO.PENDENTE,
-        ePrioridadeVO.BAIXA,
-        new HashSet<>(),
-        new HashSet<>());
+        ePrioridadeVO.BAIXA);
 
     projeto.adicionarTarefa(tarefa);
 
@@ -81,11 +77,11 @@ public class ProjetoTest {
   void naoDeveAdicionarMaisQue20Tarefas() {
     for (int i = 0; i < 20; i++) {
       projeto.adicionarTarefa(new Tarefa(new TarefaId(), "T" + i, "D", DataVencimentoVO.of(OffsetDateTime.now()),
-          eStatusTarefaVO.PENDENTE, ePrioridadeVO.MEDIA, new HashSet<>(), new HashSet<>()));
+          eStatusTarefaVO.PENDENTE, ePrioridadeVO.MEDIA));
     }
 
     Tarefa tarefaExtra = new Tarefa(new TarefaId(), "T21", "D", DataVencimentoVO.of(OffsetDateTime.now()),
-        eStatusTarefaVO.PENDENTE, ePrioridadeVO.MEDIA, new HashSet<>(), new HashSet<>());
+        eStatusTarefaVO.PENDENTE, ePrioridadeVO.MEDIA);
 
     assertThatThrownBy(() -> projeto.adicionarTarefa(tarefaExtra))
         .isInstanceOf(DomainException.class)
@@ -99,7 +95,7 @@ public class ProjetoTest {
   @Test
   void naoDeveRemoverTarefaPendente() {
     Tarefa tarefa = new Tarefa(new TarefaId(), "T1", "D", DataVencimentoVO.of(OffsetDateTime.now()),
-        eStatusTarefaVO.PENDENTE, ePrioridadeVO.ALTA, new HashSet<>(), new HashSet<>());
+        eStatusTarefaVO.PENDENTE, ePrioridadeVO.ALTA);
     projeto.adicionarTarefa(tarefa);
 
     assertThat(projeto.flushEvents())
@@ -115,7 +111,7 @@ public class ProjetoTest {
   @Test
   void deveRemoverTarefa() {
     Tarefa tarefa = new Tarefa(new TarefaId(), "T1", "D", DataVencimentoVO.of(OffsetDateTime.now()),
-        eStatusTarefaVO.CONCLUIDA, ePrioridadeVO.ALTA, new HashSet<>(), new HashSet<>());
+        eStatusTarefaVO.CONCLUIDA, ePrioridadeVO.ALTA);
     projeto.adicionarTarefa(tarefa);
 
     assertThat(projeto.flushEvents())
@@ -133,11 +129,11 @@ public class ProjetoTest {
   void devePermitirRemoverProjetoSemTarefasPendentes() {
     // Arrange
     Tarefa tarefa1 = new Tarefa(new TarefaId(), "Tarefa", "D", DataVencimentoVO.of(OffsetDateTime.now()),
-        eStatusTarefaVO.CONCLUIDA, ePrioridadeVO.BAIXA, new HashSet<>(), new HashSet<>());
+        eStatusTarefaVO.CONCLUIDA, ePrioridadeVO.BAIXA);
     projeto.adicionarTarefa(tarefa1);
 
     Tarefa tarefa2 = new Tarefa(new TarefaId(), "Tarefa", "D", DataVencimentoVO.of(OffsetDateTime.now()),
-        eStatusTarefaVO.EM_ANDAMENTO, ePrioridadeVO.ALTA, new HashSet<>(), new HashSet<>());
+        eStatusTarefaVO.EM_ANDAMENTO, ePrioridadeVO.ALTA);
     projeto.adicionarTarefa(tarefa2);
 
     // Action
@@ -181,7 +177,7 @@ public class ProjetoTest {
     // Cria 20 tarefas
     for (int i = 0; i < 20; i++) {
       projeto.adicionarTarefa(new Tarefa(new TarefaId(), "T" + i, "D", DataVencimentoVO.of(OffsetDateTime.now()),
-          eStatusTarefaVO.CONCLUIDA, ePrioridadeVO.MEDIA, new HashSet<>(), new HashSet<>()));
+          eStatusTarefaVO.CONCLUIDA, ePrioridadeVO.MEDIA));
     }
     projeto.flushEvents();
     

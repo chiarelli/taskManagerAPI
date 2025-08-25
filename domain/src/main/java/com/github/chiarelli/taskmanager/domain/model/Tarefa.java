@@ -56,10 +56,10 @@ public class Tarefa extends BaseModel {
   @NotNull
   private eStatusTarefaVO status;
   
-  private TarefaConcluidaPorVO concluidaPor;
-
   @NotNull
   private ePrioridadeVO prioridade;
+  
+  private TarefaConcluidaPorVO concluidaPor;
 
   private Set<ComentarioId> comentarios = new HashSet<>();
   private Set<HistoricoId> historicos = new HashSet<>();

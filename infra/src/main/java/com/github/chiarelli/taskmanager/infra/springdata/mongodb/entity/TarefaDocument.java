@@ -24,6 +24,9 @@ public class TarefaDocument {
   private ePrioridadeVO prioridade; // "ALTA", etc.
   private Date dataVencimento;
 
+  private String concluidoPor;
+  private Date concluidoEm;
+
   private Set<UUID> comentarioIds = new HashSet<>();
   private Set<UUID> historicoIds = new HashSet<>();
 
@@ -36,6 +39,8 @@ public class TarefaDocument {
         ", status=" + status +
         ", prioridade=" + prioridade +
         ", dataVencimento=" + dataVencimento +
+        ", concluidoPor=" + concluidoPor +
+        ", concluidoEm=" + concluidoEm +
         '}';
   }
 

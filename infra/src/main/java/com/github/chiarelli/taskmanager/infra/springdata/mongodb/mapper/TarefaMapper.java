@@ -3,23 +3,31 @@ package com.github.chiarelli.taskmanager.infra.springdata.mongodb.mapper;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.github.chiarelli.taskmanager.domain.entity.AutorId;
 import com.github.chiarelli.taskmanager.domain.entity.ComentarioId;
 import com.github.chiarelli.taskmanager.domain.entity.HistoricoId;
 import com.github.chiarelli.taskmanager.domain.entity.TarefaId;
 import com.github.chiarelli.taskmanager.domain.model.Tarefa;
 import com.github.chiarelli.taskmanager.domain.vo.DataVencimentoVO;
+import com.github.chiarelli.taskmanager.domain.vo.TarefaConcluidaPorVO;
 import com.github.chiarelli.taskmanager.infra.springdata.mongodb.entity.TarefaDocument;
 
 public class TarefaMapper {
 
   public static TarefaDocument toDocument(Tarefa tarefa) {
     TarefaDocument doc = new TarefaDocument();
-    doc.setId(tarefa.getId().getId());
-    doc.setTitulo(tarefa.getTitulo());
-    doc.setDescricao(tarefa.getDescricao());
-    doc.setStatus(tarefa.getStatus());
-    doc.setPrioridade(tarefa.getPrioridade());
-    doc.setDataVencimento(tarefa.getDataVencimento().getDataVencimento());
+      doc.setId(tarefa.getId().getId());
+      doc.setTitulo(tarefa.getTitulo());
+      doc.setDescricao(tarefa.getDescricao());
+      doc.setStatus(tarefa.getStatus());
+      doc.setPrioridade(tarefa.getPrioridade());
+      doc.setDataVencimento(tarefa.getDataVencimento().getDataVencimento());
+
+    tarefa.getConcluidaPor().ifPresent(concluidoPor -> {
+      doc.setConcluidoPor(concluidoPor.getAutorId().getId());
+      doc.setConcluidoEm(concluidoPor.getDataConclusao());
+    });
+    
     return doc;
   }
 
@@ -31,6 +39,15 @@ public class TarefaMapper {
     Set<HistoricoId> historicoIds = doc.getHistoricoIds().stream()
         .map(HistoricoId::new)
         .collect(Collectors.toSet());
+    
+    TarefaConcluidaPorVO concluidoPor = null;
+
+    if(doc.getConcluidoPor() != null && doc.getConcluidoEm() != null) {
+      var autorId = new AutorId(doc.getConcluidoPor());
+      var concluidoEm = doc.getConcluidoEm();
+
+      concluidoPor = new TarefaConcluidaPorVO(autorId, concluidoEm);
+    }
 
     return new Tarefa(
         new TarefaId(doc.getId()),
@@ -39,6 +56,7 @@ public class TarefaMapper {
         new DataVencimentoVO(doc.getDataVencimento()),
         doc.getStatus(),
         doc.getPrioridade(),
+        concluidoPor,
         comentarioIds,
         historicoIds);
   }

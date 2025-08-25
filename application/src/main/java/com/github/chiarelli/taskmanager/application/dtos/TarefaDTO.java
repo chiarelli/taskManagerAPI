@@ -3,12 +3,14 @@ package com.github.chiarelli.taskmanager.application.dtos;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import com.github.chiarelli.taskmanager.domain.entity.ComentarioId;
 import com.github.chiarelli.taskmanager.domain.entity.HistoricoId;
 import com.github.chiarelli.taskmanager.domain.entity.TarefaId;
 import com.github.chiarelli.taskmanager.domain.model.Tarefa;
 import com.github.chiarelli.taskmanager.domain.vo.DataVencimentoVO;
+import com.github.chiarelli.taskmanager.domain.vo.TarefaConcluidaPorVO;
 import com.github.chiarelli.taskmanager.domain.vo.ePrioridadeVO;
 import com.github.chiarelli.taskmanager.domain.vo.eStatusTarefaVO;
 
@@ -27,6 +29,7 @@ public class TarefaDTO {
   private DataVencimentoVO dataVencimento;
   private eStatusTarefaVO status;
   private ePrioridadeVO prioridade;
+  private TarefaConcluidaPorVO concluidaPor;
   private Long version = 0L;
 
   List<ComentarioId> comentarios = new ArrayList<>();
@@ -40,6 +43,10 @@ public class TarefaDTO {
     return Collections.unmodifiableList(historicos);
   }
 
+  public Optional<TarefaConcluidaPorVO> getConcluidaPor() {
+    return Optional.ofNullable(concluidaPor);
+  }
+
   /**
    * Converts a Tarefa object into a TarefaDTO object, excluding the collections.
    *
@@ -50,12 +57,15 @@ public class TarefaDTO {
    */
   public static TarefaDTO fromIgnoringCollections(Tarefa tarefa) {
     var target = new TarefaDTO();
-      target.setId(tarefa.getId());
-      target.setTitulo(tarefa.getTitulo());
-      target.setDescricao(tarefa.getDescricao());
-      target.setDataVencimento(tarefa.getDataVencimento());
-      target.setStatus(tarefa.getStatus());
-      target.setPrioridade(tarefa.getPrioridade());
+    target.setId(tarefa.getId());
+    target.setTitulo(tarefa.getTitulo());
+    target.setDescricao(tarefa.getDescricao());
+    target.setDataVencimento(tarefa.getDataVencimento());
+    target.setStatus(tarefa.getStatus());
+    target.setPrioridade(tarefa.getPrioridade());
+
+    tarefa.getConcluidaPor().ifPresent(concluidoPor -> target.setConcluidaPor(concluidoPor));
+
     return target;
   }
 

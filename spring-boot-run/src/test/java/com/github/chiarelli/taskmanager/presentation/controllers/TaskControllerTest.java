@@ -272,6 +272,75 @@ public class TaskControllerTest extends MongoTestContainer {
   }
 
   @Test
+  void naoDevePermitirAlterarStatusDeTarefaConcluida() throws Exception {
+    // Arrange: cria a tarefa
+    TarefaId tarefaId = criarTarefa();
+
+    // Conclui a tarefa
+    var payloadConclusao = """
+        {
+          "status": "CONCLUIDA",
+          "version": 1
+        }
+        """;
+    mockMvc.perform(patch("%s/%s/tasks/%s/status".formatted(URL_BASE, projetoId, tarefaId))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(payloadConclusao))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.status").value("CONCLUIDA"));
+
+    // Act: tenta mudar o status novamente para EM_ANDAMENTO
+    var payloadAlteracao = """
+        {
+          "status": "EM_ANDAMENTO",
+          "version": 2
+        }
+        """;
+
+    mockMvc.perform(patch("%s/%s/tasks/%s/status".formatted(URL_BASE, projetoId, tarefaId))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(payloadAlteracao))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.erros.error").value("Tarefa concluida nao pode ser alterada."));
+  }
+
+  @Test
+  void devePreencherConcluidaPorAoAlterarStatusParaConcluida() throws Exception {
+    // Arrange: cria a tarefa
+    TarefaId tarefaId = criarTarefa();
+
+    // Act: altera o status para CONCLUIDA
+    var payloadConclusao = """
+        {
+          "status": "CONCLUIDA",
+          "version": 1
+        }
+        """;
+
+    MvcResult result = mockMvc.perform(patch("%s/%s/tasks/%s/status".formatted(URL_BASE, projetoId, tarefaId))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(payloadConclusao))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.status").value("CONCLUIDA"))
+        .andExpect(jsonPath("$.concluida_por").exists())
+        .andExpect(jsonPath("$.concluida_por.autor_id").isNotEmpty())
+        .andExpect(jsonPath("$.concluida_por.data_conclusao").isNotEmpty())
+        .andReturn();
+
+    // Assert: valida o JSON
+    String json = result.getResponse().getContentAsString();
+    ObjectMapper mapper = new ObjectMapper();
+    JsonNode root = mapper.readTree(json);
+
+    assertEquals("CONCLUIDA", root.get("status").asText());
+
+    JsonNode concluidaPor = root.get("concluida_por");
+    assertNotNull(concluidaPor);
+    assertTrue(concluidaPor.get("autor_id").asText().length() > 0);
+    assertTrue(concluidaPor.get("data_conclusao").asText().length() > 0);
+  }
+
+  @Test
   void deveRetornarErroAoEnviarPrioridadeInvalida() throws Exception {
     var payload = """
         {

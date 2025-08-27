@@ -25,6 +25,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -41,6 +42,9 @@ import com.github.chiarelli.taskmanager.domain.vo.ePrioridadeVO;
 import com.github.chiarelli.taskmanager.domain.vo.eStatusTarefaVO;
 import com.github.chiarelli.taskmanager.infra.springdata.adapter.repository.MongoTestContainer;
 
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+
 
 @AutoConfigureMockMvc
 public class TaskControllerTest extends MongoTestContainer {
@@ -55,13 +59,31 @@ public class TaskControllerTest extends MongoTestContainer {
 
   private ProjetoId projetoId;
 
+  @Value("${jwt.secret}")
+  private String tokenSecret;
+
+  private String fakeTokenJWT;
+
   @AfterEach
   void limparBanco() {
     mongoTemplate.getDb().drop();
   }
 
   @BeforeEach
+  void generateToken() {
+    fakeTokenJWT = Jwts.builder()
+        .setSubject(UUID.randomUUID().toString())
+        .claim("username", "user test")
+        .claim("role", "user")
+        .setIssuedAt(new Date())
+        .signWith(SignatureAlgorithm.HS256, tokenSecret.getBytes())
+        .compact();
+  }
+
+  @BeforeEach
   void criarProjeto() throws Exception {
+    generateToken();
+
     var payload = """
         {
           "titulo": "Projeto de Integração",
@@ -69,6 +91,7 @@ public class TaskControllerTest extends MongoTestContainer {
         }
         """;
     MvcResult result = mockMvc.perform(post(URL_BASE)
+        .header("Authorization", "Bearer " + fakeTokenJWT) 
         .contentType(MediaType.APPLICATION_JSON)
         .content(payload))
         .andExpect(status().isCreated())
@@ -101,6 +124,7 @@ public class TaskControllerTest extends MongoTestContainer {
 
     MvcResult result = mockMvc.perform(post("%s/%s/tasks".formatted(URL_BASE, projetoId))
         .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "Bearer " + fakeTokenJWT) 
         .content(payload))
         .andExpect(status().isCreated())
         .andReturn();
@@ -134,6 +158,7 @@ public class TaskControllerTest extends MongoTestContainer {
     // Act
     MvcResult result = mockMvc.perform(post("%s/%s/tasks".formatted(URL_BASE, projetoId))
         .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "Bearer " + fakeTokenJWT) 
         .content(payload))
         .andExpect(status().isCreated())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -183,6 +208,7 @@ public class TaskControllerTest extends MongoTestContainer {
 
     MvcResult result = mockMvc.perform(post("%s/%s/tasks".formatted(URL_BASE, projetoId))
         .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "Bearer " + fakeTokenJWT) 
         .content(payload))
         // .andDo(print())
         .andExpect(status().isBadRequest())
@@ -211,6 +237,7 @@ public class TaskControllerTest extends MongoTestContainer {
 
     mockMvc.perform(post("%s/%s/tasks".formatted(URL_BASE, projetoId))
         .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "Bearer " + fakeTokenJWT) 
         .content(payload))
         .andExpect(status().isBadRequest());
   }
@@ -229,6 +256,7 @@ public class TaskControllerTest extends MongoTestContainer {
 
     MvcResult result = mockMvc.perform(post("%s/%s/tasks".formatted(URL_BASE, projetoId))
         .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "Bearer " + fakeTokenJWT) 
         .content(payload))
         // .andDo(print())
         .andExpect(status().isBadRequest())
@@ -257,6 +285,7 @@ public class TaskControllerTest extends MongoTestContainer {
 
     MvcResult result = mockMvc.perform(post("%s/%s/tasks".formatted(URL_BASE, projetoId))
         .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "Bearer " + fakeTokenJWT) 
         .content(payload))
         // .andDo(print())
         .andExpect(status().isBadRequest())
@@ -285,6 +314,7 @@ public class TaskControllerTest extends MongoTestContainer {
         """;
     mockMvc.perform(patch("%s/%s/tasks/%s/status".formatted(URL_BASE, projetoId, tarefaId))
         .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "Bearer " + fakeTokenJWT) 
         .content(payloadConclusao))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.status").value("CONCLUIDA"));
@@ -299,6 +329,7 @@ public class TaskControllerTest extends MongoTestContainer {
 
     mockMvc.perform(patch("%s/%s/tasks/%s/status".formatted(URL_BASE, projetoId, tarefaId))
         .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "Bearer " + fakeTokenJWT) 
         .content(payloadAlteracao))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.erros.error").value("Tarefa concluida nao pode ser alterada."));
@@ -319,6 +350,7 @@ public class TaskControllerTest extends MongoTestContainer {
 
     MvcResult result = mockMvc.perform(patch("%s/%s/tasks/%s/status".formatted(URL_BASE, projetoId, tarefaId))
         .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "Bearer " + fakeTokenJWT) 
         .content(payloadConclusao))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.status").value("CONCLUIDA"))
@@ -354,6 +386,7 @@ public class TaskControllerTest extends MongoTestContainer {
 
     MvcResult result = mockMvc.perform(post("%s/%s/tasks".formatted(URL_BASE, projetoId))
         .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "Bearer " + fakeTokenJWT) 
         .content(payload))
         // .andDo(print())
         .andExpect(status().isBadRequest())
@@ -381,6 +414,7 @@ public class TaskControllerTest extends MongoTestContainer {
 
     var result = mockMvc.perform(post("%s/%s/tasks".formatted(URL_BASE, projetoId))
         .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "Bearer " + fakeTokenJWT) 
         .content(payload))
         // .andDo(print())
         .andExpect(status().isBadRequest())
@@ -409,6 +443,7 @@ public class TaskControllerTest extends MongoTestContainer {
 
     var result = mockMvc.perform(post("%s/%s/tasks".formatted(URL_BASE, projetoId))
         .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "Bearer " + fakeTokenJWT) 
         .content(payload))
         // .andDo(print())
         .andExpect(status().isBadRequest())
@@ -437,6 +472,7 @@ public class TaskControllerTest extends MongoTestContainer {
 
     var result = mockMvc.perform(post("%s/%s/tasks".formatted(URL_BASE, projetoId))
         .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "Bearer " + fakeTokenJWT) 
         .content(payload))
         // .andDo(print())
         .andExpect(status().isBadRequest())
@@ -468,6 +504,7 @@ public class TaskControllerTest extends MongoTestContainer {
 
     MvcResult result = mockMvc.perform(post("%s/%s/tasks".formatted(URL_BASE, projetoId))
         .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "Bearer " + fakeTokenJWT) 
         .content(payload))
         // .andDo(print())
         .andExpect(status().isBadRequest())
@@ -498,6 +535,7 @@ public class TaskControllerTest extends MongoTestContainer {
 
     MvcResult result = mockMvc.perform(post("%s/%s/tasks".formatted(URL_BASE, projetoId))
         .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "Bearer " + fakeTokenJWT) 
         .content(payload))
         // .andDo(print())
         .andExpect(status().isBadRequest())
@@ -529,6 +567,7 @@ public class TaskControllerTest extends MongoTestContainer {
 
     var result = mockMvc.perform(post("%s/%s/tasks".formatted(URL_BASE, projetoId))
         .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "Bearer " + fakeTokenJWT) 
         .content(payload))
         .andExpect(status().isCreated())
         .andReturn();
@@ -541,7 +580,7 @@ public class TaskControllerTest extends MongoTestContainer {
     String tarefaUuid = jsonNode.get("id").asText();
         
     // Act
-    mockMvc.perform(get("%s/%s/tasks/%s".formatted(URL_BASE, projetoId, tarefaUuid)))
+    mockMvc.perform(get("%s/%s/tasks/%s".formatted(URL_BASE, projetoId, tarefaUuid)).header("Authorization", "Bearer " + fakeTokenJWT) )
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(tarefaUuid))
         .andExpect(jsonPath("$.titulo").value("Título da tarefa"))
@@ -556,7 +595,7 @@ public class TaskControllerTest extends MongoTestContainer {
   void deveRetornarNotFoundQuandoTarefaNaoExistir() throws Exception {
     var tarefaId   = new TarefaId();
 
-    mockMvc.perform(get("%s/%s/tasks/%s".formatted(URL_BASE, projetoId, tarefaId)))
+    mockMvc.perform(get("%s/%s/tasks/%s".formatted(URL_BASE, projetoId, tarefaId)).header("Authorization", "Bearer " + fakeTokenJWT) )
         .andExpect(status().isNotFound())
         // .andDo(print())
         .andExpect(jsonPath("$.erros.not_found").exists())
@@ -579,6 +618,7 @@ public class TaskControllerTest extends MongoTestContainer {
 
     var result = mockMvc.perform(post("%s/%s/tasks".formatted(URL_BASE, projetoId))
         .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "Bearer " + fakeTokenJWT) 
         .content(payload))
         .andExpect(status().isCreated())
         .andReturn();
@@ -593,7 +633,7 @@ public class TaskControllerTest extends MongoTestContainer {
 
     var projetoIdNaoExistente = new ProjetoId();
 
-    mockMvc.perform(get("%s/%s/tasks/%s".formatted(URL_BASE, projetoIdNaoExistente, tarefaUuid)))
+    mockMvc.perform(get("%s/%s/tasks/%s".formatted(URL_BASE, projetoIdNaoExistente, tarefaUuid)).header("Authorization", "Bearer " + fakeTokenJWT) )
         .andExpect(status().isNotFound())
         // .andDo(print())
         .andExpect(jsonPath("$.erros.not_found").exists())
@@ -604,7 +644,8 @@ public class TaskControllerTest extends MongoTestContainer {
   void deveRetornarBadRequestQuandoUuidForInvalido() throws Exception {
     String uuidInvalido = "abc";
 
-    mockMvc.perform(get("%s/%s/tasks/%s".formatted(URL_BASE, uuidInvalido, uuidInvalido)))
+    mockMvc.perform(get("%s/%s/tasks/%s".formatted(URL_BASE, uuidInvalido, uuidInvalido))
+      .header("Authorization", "Bearer " + fakeTokenJWT))
       .andExpect(status().isBadRequest());
   }
 
@@ -628,6 +669,7 @@ public class TaskControllerTest extends MongoTestContainer {
 
     mockMvc.perform(put("/api/v1/projects/{projectId}/tasks/{taskId}", projetoId, tarefaId)
         .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "Bearer " + fakeTokenJWT) 
         .content(payload))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(tarefaId.toString()))
@@ -655,6 +697,7 @@ public class TaskControllerTest extends MongoTestContainer {
 
     mockMvc.perform(put("/api/v1/projects/{projectId}/tasks/{taskId}", projetoId, tarefaId)
         .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "Bearer " + fakeTokenJWT) 
         .content(payload))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.erros.error").value("Tarefa %s não pertence ao projeto %s".formatted(tarefaId, projetoId)));
@@ -675,6 +718,7 @@ public class TaskControllerTest extends MongoTestContainer {
     // Body = {"erros":{"prioridade":"A prioridade da tarefa deve ser informada","dataVencimento":"A data de vencimento deve ser informada","titulo":"O título deve ter entre 8 e 100 caracteres"}}
     mockMvc.perform(put("/api/v1/projects/{projectId}/tasks/{taskId}", projetoId, tarefaId)
         .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "Bearer " + fakeTokenJWT) 
         .content(payload))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.erros.titulo").value("O título deve ter entre 8 e 100 caracteres"))
@@ -703,6 +747,7 @@ public class TaskControllerTest extends MongoTestContainer {
 
     mockMvc.perform(put("/api/v1/projects/{projectId}/tasks/{taskId}", projetoId, tarefaId)
         .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "Bearer " + fakeTokenJWT) 
         .content(payload))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.erros.version").exists());
@@ -723,6 +768,7 @@ public class TaskControllerTest extends MongoTestContainer {
 
     mockMvc.perform(patch("/api/v1/projects/{projectId}/tasks/{taskId}/status", projetoId, tarefaId)
         .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "Bearer " + fakeTokenJWT) 
         .content(body))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.status").value("CONCLUIDA"));
@@ -744,6 +790,7 @@ public class TaskControllerTest extends MongoTestContainer {
     
     mockMvc.perform(patch("/api/v1/projects/{projectId}/tasks/{taskId}/status", projetoId, tarefaId)
         .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "Bearer " + fakeTokenJWT) 
         .content(body))
         .andDo(print())
         .andExpect(status().isBadRequest())
@@ -766,6 +813,7 @@ public class TaskControllerTest extends MongoTestContainer {
 
     MvcResult result = mockMvc.perform(post("%s/%s/tasks".formatted(URL_BASE, projetoId))
         .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "Bearer " + fakeTokenJWT) 
         .content(payload))
         .andExpect(status().isCreated())
         .andReturn();
@@ -782,7 +830,7 @@ public class TaskControllerTest extends MongoTestContainer {
     TarefaId tarefaId = new TarefaId(UUID.fromString(tarefaUuid));
 
     // Act & Assert
-    mockMvc.perform(delete("/api/v1/projects/{projectId}/tasks/{taskId}", projetoId, tarefaId))
+    mockMvc.perform(delete("/api/v1/projects/{projectId}/tasks/{taskId}", projetoId, tarefaId).header("Authorization", "Bearer " + fakeTokenJWT) )
         .andExpect(status().isNoContent());
 
     // Verificação extra: garantir que a tarefa não está mais no repositório
@@ -797,7 +845,7 @@ public class TaskControllerTest extends MongoTestContainer {
     TarefaId tarefaId = criarTarefa(); // método helper para criar tarefa válida
 
     // Act & Assert
-    mockMvc.perform(delete("/api/v1/projects/{projectId}/tasks/{taskId}", projetoId, tarefaId))
+    mockMvc.perform(delete("/api/v1/projects/{projectId}/tasks/{taskId}", projetoId, tarefaId).header("Authorization", "Bearer " + fakeTokenJWT) )
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.erros.error").value("Tarefa com status pendente não pode ser excluida."))
         ;
@@ -812,13 +860,13 @@ public class TaskControllerTest extends MongoTestContainer {
   void deveRetornar204MesmoSeTarefaNaoExistir() throws Exception {
     UUID tarefaInexistente = UUID.randomUUID();
 
-    mockMvc.perform(delete("/api/v1/projects/{projectId}/tasks/{taskId}", projetoId, tarefaInexistente))
+    mockMvc.perform(delete("/api/v1/projects/{projectId}/tasks/{taskId}", projetoId, tarefaInexistente).header("Authorization", "Bearer " + fakeTokenJWT) )
         .andExpect(status().isNoContent());
   }
 
   @Test
   void deveRetornar400QuandoJsonEstiverMalFormado() throws Exception {
-    mockMvc.perform(delete("/api/v1/projects/{projectId}/tasks/{taskId}", projetoId, "id-malformado"))
+    mockMvc.perform(delete("/api/v1/projects/{projectId}/tasks/{taskId}", projetoId, "id-malformado").header("Authorization", "Bearer " + fakeTokenJWT) )
         .andExpect(status().isBadRequest());
   }
 

@@ -9,12 +9,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import org.bson.Document;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
@@ -23,6 +26,9 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import com.github.chiarelli.taskmanager.infra.springdata.adapter.repository.MongoTestContainer;
 import com.jayway.jsonpath.JsonPath;
+
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
@@ -33,9 +39,25 @@ public class ProjectControllerTest extends MongoTestContainer {
   @Autowired
   private MockMvc mockMvc;
 
-  @AfterEach
+  @Value("${jwt.secret}")
+  private String tokenSecret;
+
+  private String fakeTokenJWT;
+
+  @BeforeEach
   void limparBanco() {
     mongoTemplate.getDb().drop();
+  }
+
+  @BeforeEach
+  void generateToken() {
+      fakeTokenJWT = Jwts.builder()
+              .setSubject(UUID.randomUUID().toString())
+              .claim("username", "user test")
+              .claim("role", "user")
+              .setIssuedAt(new Date())
+              .signWith(SignatureAlgorithm.HS256, tokenSecret.getBytes())
+              .compact();
   }
 
   @Test
@@ -51,6 +73,7 @@ public class ProjectControllerTest extends MongoTestContainer {
     // Act & Assert
     mockMvc.perform(post(URL_BASE)
         .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "Bearer " + fakeTokenJWT) 
         .content(payload))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.id").exists())
@@ -74,6 +97,7 @@ public class ProjectControllerTest extends MongoTestContainer {
     // Criar projeto primeiro via POST
     MvcResult postResult = mockMvc.perform(post(URL_BASE)
         .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "Bearer " + fakeTokenJWT) 
         .content("""
             {
               "titulo": "%s",
@@ -88,7 +112,7 @@ public class ProjectControllerTest extends MongoTestContainer {
     String projectId = JsonPath.read(jsonResponse, "$.id");
 
     // Act + Assert: Buscar projeto pelo ID
-    mockMvc.perform(get(URL_BASE + "/{projectId}", projectId))
+    mockMvc.perform(get(URL_BASE + "/{projectId}", projectId).header("Authorization", "Bearer " + fakeTokenJWT) )
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(projectId))
         .andExpect(jsonPath("$.titulo").value(titulo))
@@ -103,6 +127,7 @@ public class ProjectControllerTest extends MongoTestContainer {
 
     MvcResult postResult = mockMvc.perform(post(URL_BASE)
         .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "Bearer " + fakeTokenJWT) 
         .content("""
             {
               "titulo": "%s",
@@ -122,6 +147,7 @@ public class ProjectControllerTest extends MongoTestContainer {
 
     mockMvc.perform(put(URL_BASE + "/{projectId}", projectId)
         .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "Bearer " + fakeTokenJWT) 
         .content("""
             {
               "titulo": "%s",
@@ -141,6 +167,7 @@ public class ProjectControllerTest extends MongoTestContainer {
     // Arrange: criar projeto inicial
     var createResult = mockMvc.perform(post(URL_BASE)
         .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "Bearer " + fakeTokenJWT) 
         .content("""
             {"titulo":"Projeto", "descricao":"Descricao"}
             """))
@@ -154,6 +181,7 @@ public class ProjectControllerTest extends MongoTestContainer {
     // Act & Assert: enviar PUT com mesmos dados e mesma versão
     mockMvc.perform(put(URL_BASE + "/{projectId}", projectId)
         .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "Bearer " + fakeTokenJWT) 
         .content("""
             {"titulo":"Projeto", "descricao":"Descricao", "version": %d}
             """.formatted(version)))
@@ -166,6 +194,7 @@ public class ProjectControllerTest extends MongoTestContainer {
     // Arrange: criar projeto inicial
     var createResult = mockMvc.perform(post(URL_BASE)
         .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "Bearer " + fakeTokenJWT) 
         .content("""
             {"titulo":"Projeto", "descricao":"Descricao"}
             """))
@@ -178,6 +207,7 @@ public class ProjectControllerTest extends MongoTestContainer {
     // Enviar PUT com versão inválida (ex: 999)
     mockMvc.perform(put(URL_BASE + "/{projectId}", projectId)
         .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "Bearer " + fakeTokenJWT) 
         .content("""
             {"titulo":"Projeto Alterado", "descricao":"Descricao Alterada", "version": 999}
             """))
@@ -190,6 +220,7 @@ public class ProjectControllerTest extends MongoTestContainer {
     // Arrange: cria um projeto
     var createResult = mockMvc.perform(post(URL_BASE)
         .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "Bearer " + fakeTokenJWT) 
         .content("""
             {"titulo":"Projeto para Remover", "descricao":"Descrição"}
             """))
@@ -200,11 +231,11 @@ public class ProjectControllerTest extends MongoTestContainer {
     String projectId = JsonPath.read(responseBody, "$.id");
 
     // Act & Assert: envia DELETE e espera 204
-    mockMvc.perform(delete(URL_BASE + "/{projectId}", projectId))
+    mockMvc.perform(delete(URL_BASE + "/{projectId}", projectId).header("Authorization", "Bearer " + fakeTokenJWT) )
         .andExpect(status().isNoContent());
 
     // Opcional: confirma que não existe mais (404)
-    mockMvc.perform(get(URL_BASE + "/{projectId}", projectId))
+    mockMvc.perform(get(URL_BASE + "/{projectId}", projectId).header("Authorization", "Bearer " + fakeTokenJWT) )
         .andExpect(status().isNotFound());
   }
 
@@ -213,6 +244,7 @@ public class ProjectControllerTest extends MongoTestContainer {
     // Arrange: cria um projeto
     var createResult = mockMvc.perform(post(URL_BASE)
         .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "Bearer " + fakeTokenJWT) 
         .content("""
             {"titulo":"Projeto X", "descricao":"Descricao X"}
             """))
@@ -223,11 +255,11 @@ public class ProjectControllerTest extends MongoTestContainer {
     String projectId = JsonPath.read(responseBody, "$.id");
 
     // Primeira remoção
-    mockMvc.perform(delete(URL_BASE + "/{projectId}", projectId))
+    mockMvc.perform(delete(URL_BASE + "/{projectId}", projectId).header("Authorization", "Bearer " + fakeTokenJWT) )
         .andExpect(status().isNoContent());
 
     // Segunda tentativa (idempotente)
-    mockMvc.perform(delete(URL_BASE + "/{projectId}", projectId))
+    mockMvc.perform(delete(URL_BASE + "/{projectId}", projectId).header("Authorization", "Bearer " + fakeTokenJWT) )
         .andExpect(status().isNoContent());
   }
 
@@ -237,6 +269,7 @@ public class ProjectControllerTest extends MongoTestContainer {
       for (int i = 1; i <= 2; i++) {
           mockMvc.perform(post(URL_BASE)
                   .contentType(MediaType.APPLICATION_JSON)
+                  .header("Authorization", "Bearer " + fakeTokenJWT) 
                   .content("""
                           {
                             "titulo": "Projeto %d",
@@ -248,6 +281,7 @@ public class ProjectControllerTest extends MongoTestContainer {
 
       // Act & Assert: lista os projetos criados
       mockMvc.perform(get(URL_BASE)
+            .header("Authorization", "Bearer " + fakeTokenJWT) 
               .param("page", "1")
               .param("pageSize", "10"))
               .andExpect(status().isOk())
@@ -262,6 +296,7 @@ public class ProjectControllerTest extends MongoTestContainer {
   @Test
   void listarProjetos_semDados_retornaPaginaVazia() throws Exception {
       mockMvc.perform(get(URL_BASE)
+              .header("Authorization", "Bearer " + fakeTokenJWT) 
               .param("page", "1")
               .param("pageSize", "10"))
               .andExpect(status().isOk())
@@ -276,6 +311,7 @@ public class ProjectControllerTest extends MongoTestContainer {
   @Test
   void listarProjetos_comParametrosInvalidos_retorna400() throws Exception {
       mockMvc.perform(get(URL_BASE)
+      .header("Authorization", "Bearer " + fakeTokenJWT) 
           .param("page", "0")        // inválido: mínimo é 1
           .param("pageSize", "0"))   // inválido: mínimo é 1
         // .andDo(System.out::println)
